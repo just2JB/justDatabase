@@ -35,7 +35,9 @@ DBS: https://app.notion.com/p/3f6491693a36806ab1f7d2f6e9f9efb7
 
 관계 모델은 `?page=relation`로 접근합니다. `src/RelationPage.tsx`에 화면과 이해용 시뮬레이션, `src/relationContent.ts`에 목차·학습 내용·검색 항목이 있습니다. 도메인과 유일성은 예시에서 정한 조건으로 설명합니다. 무결성 예시는 실제 DB에 연결하지 않습니다.
 
-문제 풀기는 `?page=quiz`로 접근합니다. `src/quizContent.ts`에 학습용 문제·정답·해설, `src/QuizPage.tsx`에 단원·유형 선택, 채점, 결과·오답 복습, 릴레이션 실습을 구현했습니다. 각 단원에 객관식 4문제와 OX 4문제가 있습니다. 실습은 열·행을 선택해 후보키, 복합키, 참조·개체 무결성, 원자성을 비교합니다. 풀이 기록은 현재 화면의 상태로만 유지합니다.
+문제 선택은 `?page=quiz`, 개념 풀이 전용 페이지는 `?page=quiz&view=solve`, 릴레이션 실습 전용 페이지는 `?page=quiz&view=practice`입니다. `src/quizContent.ts`에 학습용 문제·정답·해설, `src/QuizPage.tsx`에 화면을 구현했습니다. 각 단원에 객관식 4문제와 OX 4문제가 있습니다. 실습은 열·행을 선택해 후보키, 복합키, 참조·개체 무결성, 원자성을 비교합니다.
+
+`src/quizStorage.ts`는 문제 순서·답안·현재 위치·결과·실습 진행도를 `justDatabase.quiz.v2.*` 로컬스토리지 키로 저장하고 검증해 복원합니다. 저장은 같은 브라우저와 같은 사이트 주소에서 유지됩니다. 저장을 사용할 수 없는 환경에서는 화면에 안내하고 현재 세션의 풀이를 계속할 수 있습니다. 문항 개념 검토 내역과 근거는 `docs/question-review.md`에 기록했습니다.
 
 DBS는 `?page=dbs`로 접근합니다. 화면과 시각화는 `src/DbsPage.tsx`, 학습 내용·목차·검색 항목은 `src/dbsContent.ts`에 있습니다. 예시와 개념도는 본문 내용을 이해하기 위한 자료로 구성했으며, SQL 예시는 실행하지 않습니다.
 

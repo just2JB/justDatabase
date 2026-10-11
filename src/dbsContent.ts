@@ -20,7 +20,7 @@ export const dbsGroups = [
 export const dbsSearchEntries: SearchEntry[] = [
   { title: 'DBS 데이터베이스 시스템', text: 'Database System 데이터 저장 관리 조직에 필요한 정보 생성', section: 'dbs-intro', page: 'dbs' },
   { title: '스키마 Schema', text: '데이터 구조 제약조건 정의 설계', section: 'dbs-intro', target: 'schema-instance', page: 'dbs' },
-  { title: '인스턴스 Instance', text: '스키마에 따라 실제로 저장된 값', section: 'dbs-intro', target: 'schema-instance', page: 'dbs' },
+  { title: '인스턴스 Instance', text: '스키마에 따라 특정 시점에 실제로 저장된 데이터의 상태', section: 'dbs-intro', target: 'schema-instance', page: 'dbs' },
   ...levels.map(level => ({ title: `${level.title} · ${level.english}`, text: `${level.perspective} ${level.count} ${level.description} ${level.example}`, section: 'dbs-levels', page: 'dbs' as const })),
   { title: '사상 매핑 Mapping', text: '외부 개념 응용 인터페이스 개념 내부 저장 인터페이스 스키마 대응 관계 데이터 독립성', section: 'dbs-levels', target: 'dbs-mappings', page: 'dbs' },
   { title: '논리적 데이터 독립성', text: '개념 스키마 변경 외부 스키마 영향 없음 외부 개념 사상 수정', section: 'dbs-independence', target: 'logical-independence', page: 'dbs' },

@@ -62,9 +62,8 @@ export default function Sidebar({ active, page, onSelect }: { active: string; pa
       <details className={`toc-page ${page === 'relation' ? 'current' : ''}`} open={expanded.relation}><summary onClick={event => { event.preventDefault(); togglePage('relation') }}><Icon /><span>관계 데이터 모델</span><Chevron /></summary>
         <div className="toc-groups">{relationGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); onSelect({ ...keyword, text: '', section: group.section, page: 'relation' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
       </details>
-      <details className={`toc-page quiz-nav ${page === 'quiz' ? 'current' : ''}`} open={expanded.quiz}><summary onClick={event => { event.preventDefault(); togglePage('quiz') }}><Icon /><span>문제 풀기</span><Chevron /></summary><div className="toc-groups"><a href="?page=quiz#concept-quiz" onClick={event => { event.preventDefault(); onSelect({ title: '', text: '', section: 'concept-quiz', page: 'quiz' }) }}>객관식 · OX</a><a href="?page=quiz#relation-practice" onClick={event => { event.preventDefault(); onSelect({ title: '', text: '', section: 'relation-practice', page: 'quiz' }) }}>릴레이션 직접 만들기</a></div></details>
     </nav>
-    <div className="sidebar-footer">수업 내용을 차근차근,<br />개념에서 이해까지.</div>
+    <div className="sidebar-bottom"><button type="button" className="sidebar-quiz-button" aria-current={page === 'quiz' ? 'page' : undefined} onClick={() => onSelect({ title: '', text: '', section: 'main', page: 'quiz' })}><Icon /><span>문제 풀기</span><Icon kind="arrow" /></button><div className="sidebar-footer">수업 내용을 차근차근,<br />개념에서 이해까지.</div></div>
   </aside>
 }
 

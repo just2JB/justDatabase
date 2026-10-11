@@ -23,6 +23,7 @@ export default function App() {
     const url = new URL(window.location.href)
     if (page !== 'basics') url.searchParams.set('page', page)
     else url.searchParams.delete('page')
+    if (page !== 'quiz') url.searchParams.delete('view')
     window.history.replaceState(null, '', url)
   }, [page, pageTitle])
 
@@ -32,6 +33,14 @@ export default function App() {
   }, [destination])
 
   function selectSearchResult(entry: SearchEntry) {
+    if (entry.page === 'quiz') {
+      const url = new URL(location.href)
+      url.searchParams.set('page', 'quiz')
+      if (entry.section === 'relation-practice') url.searchParams.set('view', 'practice')
+      else url.searchParams.delete('view')
+      window.history.replaceState(null, '', url)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
     setActive(entry.section)
     setPage(entry.page ?? 'basics')
     if (entry.shape !== undefined) setShape(entry.shape)

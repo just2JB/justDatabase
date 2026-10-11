@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from './components'
 import type { PageId, SearchEntry } from './content'
 import { dbmsGroups } from './dbmsContent'
@@ -32,7 +32,38 @@ const groups = [
 ]
 
 export default function Sidebar({ active, page, onSelect }: { active: string; page: PageId; onSelect: (entry: SearchEntry) => void }) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobile, setMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches)
+  const panel = useRef<HTMLElement>(null)
+  const trigger = useRef<HTMLButtonElement>(null)
   const [expanded, setExpanded] = useState({ basics: page === 'basics', dbms: page === 'dbms', dbs: page === 'dbs', relation: page === 'relation', quiz: page === 'quiz' })
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 760px)')
+    function resize() { setMobile(query.matches); if (!query.matches) setMobileOpen(false) }
+    query.addEventListener('change', resize)
+    return () => query.removeEventListener('change', resize)
+  }, [])
+
+  useEffect(() => {
+    if (!mobile || !mobileOpen) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    panel.current?.querySelector<HTMLButtonElement>('.mobile-toc-close')?.focus()
+    function keydown(event: KeyboardEvent) {
+      if (event.key === 'Escape') { setMobileOpen(false); return }
+      if (event.key !== 'Tab') return
+      const items = Array.from(panel.current?.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), summary') ?? []).filter(element => element.getClientRects().length > 0)
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus() }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus() }
+    }
+    document.addEventListener('keydown', keydown)
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener('keydown', keydown); trigger.current?.focus() }
+  }, [mobile, mobileOpen])
+
+  function selectItem(entry: SearchEntry) { setMobileOpen(false); onSelect(entry) }
 
   useEffect(() => {
     setExpanded(previous => ({ ...previous, [page]: true }))
@@ -43,28 +74,28 @@ export default function Sidebar({ active, page, onSelect }: { active: string; pa
     if (page !== target && !expanded[target]) onSelect({ title: '', text: '', section: 'main', page: target })
   }
 
-  return <aside className="sidebar">
-    <a className="brand" href="#main"><Icon kind="database" /><span>justDatabase</span></a>
+  return <><button type="button" ref={trigger} className="mobile-toc-trigger" aria-label="학습 목차 열기" aria-controls="study-sidebar" aria-expanded={mobileOpen} onClick={() => setMobileOpen(true)}><Icon /><span>목차</span></button>{mobile && mobileOpen ? <button type="button" className="mobile-toc-backdrop" aria-label="목차 닫기" tabIndex={-1} onClick={() => setMobileOpen(false)} /> : null}<aside id="study-sidebar" ref={panel} className={`sidebar ${mobileOpen ? 'mobile-open' : ''}`} role={mobile && mobileOpen ? 'dialog' : 'complementary'} aria-modal={mobile && mobileOpen ? true : undefined} aria-label="학습 목차">
+    <div className="sidebar-heading"><a className="brand" href="#main" onClick={() => setMobileOpen(false)}><Icon kind="database" /><span>justDatabase</span></a><button type="button" className="mobile-toc-close" aria-label="목차 닫기" onClick={() => setMobileOpen(false)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></div>
     <p className="nav-label">개념 정리</p>
     <nav className="compact-toc" aria-label="학습 목차">
       <details className={`toc-page ${page === 'basics' ? 'current' : ''}`} open={expanded.basics}><summary onClick={event => { event.preventDefault(); togglePage('basics') }}><Icon /><span>데이터베이스, 정보</span><Chevron /></summary>
         <div className="toc-groups">{groups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}>
           <summary><Chevron /><span>{group.title}</span></summary>
-          <ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); onSelect({ ...keyword, text: '', section: group.section }) }}>{keyword.title}</a></li>)}</ul>
+          <ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section }) }}>{keyword.title}</a></li>)}</ul>
         </details>)}</div>
       </details>
       <details className={`toc-page ${page === 'dbms' ? 'current' : ''}`} open={expanded.dbms}><summary onClick={event => { event.preventDefault(); togglePage('dbms') }}><Icon kind="database" /><span>데이터베이스 관리 시스템</span><Chevron /></summary>
-        <div className="toc-groups">{dbmsGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); onSelect({ ...keyword, text: '', section: group.section, page: 'dbms' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
+        <div className="toc-groups">{dbmsGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: 'dbms' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
       </details>
       <details className={`toc-page ${page === 'dbs' ? 'current' : ''}`} open={expanded.dbs}><summary onClick={event => { event.preventDefault(); togglePage('dbs') }}><Icon kind="database" /><span>데이터베이스 시스템</span><Chevron /></summary>
-        <div className="toc-groups">{dbsGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); onSelect({ ...keyword, text: '', section: group.section, page: 'dbs' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
+        <div className="toc-groups">{dbsGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: 'dbs' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
       </details>
       <details className={`toc-page ${page === 'relation' ? 'current' : ''}`} open={expanded.relation}><summary onClick={event => { event.preventDefault(); togglePage('relation') }}><Icon /><span>관계 데이터 모델</span><Chevron /></summary>
-        <div className="toc-groups">{relationGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); onSelect({ ...keyword, text: '', section: group.section, page: 'relation' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
+        <div className="toc-groups">{relationGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: 'relation' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
       </details>
     </nav>
-    <div className="sidebar-bottom"><button type="button" className="sidebar-quiz-button" aria-current={page === 'quiz' ? 'page' : undefined} onClick={() => onSelect({ title: '', text: '', section: 'main', page: 'quiz' })}><Icon /><span>문제 풀기</span><Icon kind="arrow" /></button><div className="sidebar-footer">수업 내용을 차근차근,<br />개념에서 이해까지.</div></div>
-  </aside>
+    <div className="sidebar-bottom"><button type="button" className="sidebar-quiz-button" aria-current={page === 'quiz' ? 'page' : undefined} onClick={() => selectItem({ title: '', text: '', section: 'main', page: 'quiz' })}><Icon /><span>문제 풀기</span><Icon kind="arrow" /></button><div className="sidebar-footer">수업 내용을 차근차근,<br />개념에서 이해까지.</div></div>
+  </aside></>
 }
 
 function Chevron() {

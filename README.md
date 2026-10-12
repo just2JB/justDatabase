@@ -20,6 +20,8 @@ npm run dev
 - DBS 학습 페이지: 스키마·인스턴스, 3단계 구조·사상, 데이터 독립성, 메타데이터, 사용자와 데이터 언어
 - 관계 데이터 모델: 릴레이션 기본 용어, 특성, 키의 종류와 조건, 개체·참조 무결성
 - 문제 풀기: 객관식 16문제, OX 16문제, 릴레이션 선택·구성 실습 6문제
+- 4주차 SQL 기초: SQL 분류, 실행 준비, CREATE/ALTER/DROP, 제약조건, 구조 변경 예시
+- 5주차 SQL 검색: 조건·정렬·집계·조인·부속질의·집합·EXISTS 및 질의 3-1~3-33 결과 미리보기
 - 두 학습 페이지를 목차에서 전환하고 통합 검색으로 원하는 페이지의 개념에 이동
 - 내용: `src/content.ts`, 화면: `src/App.tsx`, 공통 요소: `src/components.tsx`
 
@@ -46,6 +48,8 @@ DBMS 화면은 `src/DbmsPage.tsx`, 학습 내용과 검색 항목은 `src/dbmsCo
 노션 본문만 반영했습니다. 영어 용어 및 명백한 표현상 오타를 다듬었으며, 정보 시스템 이미지는 원문으로 연결했습니다. PPT는 이번 페이지에서 검토하지 않았습니다. SQL 실행 및 실제 데이터베이스 연결은 후속 요청 시 구현합니다.
 
 ## Vercel 배포
+
+SQL 학습은 `?page=sql4`와 `?page=sql5`로 접근합니다. `src/sqlLessonData.ts`에 원본 서점 데이터와 질의 예제가 있고, `src/SqlBasicsPage.tsx`, `src/SqlQueriesPage.tsx`, `src/SqlLessonParts.tsx`에 학습 화면을 구현했습니다. 내용 매핑과 MySQL 문법 보정 근거는 `docs/sql-slide-review.md`에 있습니다.
 
 Vite 프로젝트로 가져오면 됩니다. 빌드 명령은 `npm run build`, 출력 폴더는 `dist`입니다. 아직 배포하지 않았습니다.
 

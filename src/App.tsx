@@ -52,7 +52,7 @@ export default function App() {
     <Sidebar active={active} page={page} onSelect={selectSearchResult} />
     <main id="main">
       <header className="topbar"><span>개념 정리 <span className="slash">/</span> {pageTitle}</span><Search onSelect={selectSearchResult} /></header>
-      <div className="document">
+      <div className="document page-enter" key={page}>
         {page === 'quiz' ? <QuizPage onLearn={selectSearchResult} /> : page === 'relation' ? <RelationPage /> : page === 'dbs' ? <DbsPage key={destination?.language ?? 0} initialLanguage={destination?.language ?? 0} /> : page === 'dbms' ? <DbmsPage key={destination?.model ?? 0} initialModel={destination?.model ?? 0} /> : <>
         <div className="page-heading"><h1>데이터베이스, 정보</h1><p>관측한 데이터가 의미 있는 정보가 되기까지.</p></div>
         <StudySection id="data" number="01" title="데이터와 정보">
@@ -71,7 +71,7 @@ export default function App() {
         <StudySection id="classification" number="03" title="데이터의 분류">
           <>
           <h3 id="data-shapes" className="subheading">형태에 따른 분류</h3><div className="shape-tabs" role="tablist" aria-label="데이터 형태">{shapes.map((item, index) => <button key={item.name} type="button" role="tab" id={`shape-tab-${index}`} aria-selected={shape === index} aria-controls="shape-panel" onClick={() => setShape(index)}>{item.name}</button>)}</div>
-          <article className="shape-panel" role="tabpanel" id="shape-panel" aria-labelledby={`shape-tab-${shape}`}><div className="shape-copy"><span className="english">{selected.english}</span><h4>{selected.description}</h4><p>{selected.detail}</p><div className="example"><span>예시</span>{selected.examples}</div></div><ShapeVisual shape={shape} /></article>
+          <article key={shape} className="shape-panel content-enter" role="tabpanel" id="shape-panel" aria-labelledby={`shape-tab-${shape}`}><div className="shape-copy"><span className="english">{selected.english}</span><h4>{selected.description}</h4><p>{selected.detail}</p><div className="example"><span>예시</span>{selected.examples}</div></div><ShapeVisual shape={shape} /></article>
           </>
           <h3 id="data-types" className="subheading type-heading">특성에 따른 분류</h3><div className="type-intro"><p><strong>범주형 데이터</strong>종류를 나타내는 값을 가진 데이터<br />크기 비교와 산술적 연산 불가</p><p><strong>수치형 데이터</strong>이산형과 연속형으로 이루어진 자료</p></div>
           <div className="table-wrap"><table><caption className="sr-only">특성에 따른 데이터 분류 비교</caption><thead><tr><th scope="col">구분</th><th scope="col">유형</th><th scope="col">특징</th><th scope="col">예시</th></tr></thead><tbody>{types.map(type => <tr key={type.name}><td>{type.group}</td><th scope="row">{type.name}</th><td>{type.description}</td><td>{type.examples}</td></tr>)}</tbody></table></div>

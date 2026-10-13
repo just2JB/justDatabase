@@ -4,6 +4,7 @@ import type { PageId, SearchEntry } from './content'
 import { dbmsGroups } from './dbmsContent'
 import { dbsGroups } from './dbsContent'
 import { relationGroups } from './relationContent'
+import { subqueryGroups, changeGroups } from './sqlAdvancedData'
 import { sql4Groups, sql5Groups } from './sqlLessonData'
 
 const groups = [
@@ -37,7 +38,7 @@ export default function Sidebar({ active, page, onSelect }: { active: string; pa
   const [mobile, setMobile] = useState(() => window.matchMedia('(max-width: 760px)').matches)
   const panel = useRef<HTMLElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
-  const [expanded, setExpanded] = useState({ basics: page === 'basics', dbms: page === 'dbms', dbs: page === 'dbs', relation: page === 'relation', quiz: page === 'quiz', sql4: page === 'sql4', sql5: page === 'sql5' })
+  const [expanded, setExpanded] = useState({ basics: page === 'basics', dbms: page === 'dbms', dbs: page === 'dbs', relation: page === 'relation', quiz: page === 'quiz', sql4: page === 'sql4', sql5: page === 'sql5', subqueries: page === 'subqueries', changes: page === 'changes' })
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 760px)')
@@ -94,7 +95,7 @@ export default function Sidebar({ active, page, onSelect }: { active: string; pa
       <details className={`toc-page ${page === 'relation' ? 'current' : ''}`} open={expanded.relation}><summary onClick={event => { event.preventDefault(); togglePage('relation') }}><Icon /><span>관계 데이터 모델</span><Chevron /></summary>
         <div className="toc-groups">{relationGroups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: 'relation' }) }}>{keyword.title}</a></li>)}</ul></details>)}</div>
       </details>
-      {([{ id: 'sql4', title: 'SQL 기초 · 테이블 정의', groups: sql4Groups }, { id: 'sql5', title: 'SQL 검색 · 데이터 질의', groups: sql5Groups }] as const).map(lesson => <details key={lesson.id} className={`toc-page ${page === lesson.id ? 'current' : ''}`} open={expanded[lesson.id]}><summary onClick={event => { event.preventDefault(); togglePage(lesson.id) }}><Icon /><span>{lesson.title}</span><Chevron /></summary><div className="toc-groups">{lesson.groups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: lesson.id }) }}>{keyword.title}</a></li>)}</ul></details>)}</div></details>)}
+      {([{ id: 'sql4', title: 'SQL 기초 · 테이블 정의', groups: sql4Groups }, { id: 'sql5', title: 'SQL 검색 · 데이터 질의', groups: sql5Groups }, { id: 'subqueries', title: '부속질의', groups: subqueryGroups }, { id: 'changes', title: '데이터 삽입·수정·삭제', groups: changeGroups }] as const).map(lesson => <details key={lesson.id} className={`toc-page ${page === lesson.id ? 'current' : ''}`} open={expanded[lesson.id]}><summary onClick={event => { event.preventDefault(); togglePage(lesson.id) }}><Icon /><span>{lesson.title}</span><Chevron /></summary><div className="toc-groups">{lesson.groups.map(group => <details className={`toc-group ${active === group.section ? 'selected' : ''}`} key={group.section}><summary><Chevron /><span>{group.title}</span></summary><ul>{group.keywords.map(keyword => <li key={keyword.title}><a href={`#${keyword.target}`} onClick={event => { event.preventDefault(); selectItem({ ...keyword, text: '', section: group.section, page: lesson.id }) }}>{keyword.title}</a></li>)}</ul></details>)}</div></details>)}
     </nav>
     <div className="sidebar-bottom"><button type="button" className="sidebar-quiz-button" aria-current={page === 'quiz' ? 'page' : undefined} onClick={() => selectItem({ title: '', text: '', section: 'main', page: 'quiz' })}><Icon /><span>문제 풀기</span><Icon kind="arrow" /></button><div className="sidebar-footer">수업 내용을 차근차근,<br />개념에서 이해까지.</div></div>
   </aside></>

@@ -28,7 +28,7 @@ export const uses = [
   { field: '학술정보', items: ['연구학술정보 — 논문, 서적, 저작물에 관한 정보', '특허정보 — 특허청의 정보를 기업과 연구자에게 제공', '법률정보 — 법제처와 대법원의 법률에 관한 정보', '통계정보 — 국가기관의 통계에 관한 정보'] },
 ]
 
-export type PageId = 'basics' | 'dbms' | 'dbs' | 'relation' | 'quiz' | 'sql4' | 'sql5'
+export type PageId = 'basics' | 'dbms' | 'dbs' | 'relation' | 'quiz' | 'sql4' | 'sql5' | 'subqueries' | 'changes'
 export type SearchEntry = { title: string; text: string; section: string; shape?: number; model?: number; language?: number; sqlQuery?: number; target?: string; page?: PageId }
 export const searchEntries: SearchEntry[] = [
   ...sections.map(section => ({ title: section.title, text: '', section: section.id })),

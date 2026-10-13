@@ -102,3 +102,9 @@
 /* SQL 답안 확인 모달 */
 .sql-after-run-guide{margin-top:16px}.sql-after-run-guide .sql-exercise-guide,.sql-after-run-guide .sql-exercise-caution{margin:0}.sql-after-run-guide .sql-exercise-caution{margin-top:10px}.sql-answer-button{border-color:#9bb7df;color:#285a9e}.sql-answer-modal-backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:#10213c88}.sql-answer-modal{width:min(430px,100%);padding:27px 28px;border-radius:10px;background:#fff;box-shadow:0 20px 60px #0d1c3740}.sql-answer-modal>span{display:block;margin-bottom:7px;color:#4972aa;font-size:10px;font-weight:700}.sql-answer-modal h4{font-size:20px;color:#172443}.sql-answer-modal>p{margin-top:10px;color:#66758c;font-size:12px;line-height:1.8}.sql-answer-modal>div{display:flex;justify-content:flex-end;gap:9px;margin-top:22px}.sql-answer-modal .quiz-primary{margin:0}
 @media(max-width:760px){.sql-answer-modal{padding:22px 20px}.sql-answer-modal h4{font-size:18px}.sql-answer-modal>div{flex-direction:column-reverse}.sql-answer-modal button{width:100%}}
+.sql-exercise { border: 1px solid var(--border, #e5e7eb); border-radius: 12px; margin: 12px 0; overflow: hidden; }
+.sql-exercise > summary { cursor: pointer; padding: 16px 20px; font-weight: 600; line-height: 1.6; }
+.sql-exercise > div { padding: 0 20px 16px; }
+.sql-change-action { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin: 20px 0; color: #53647a; }
+.sql-change-action button { border: 0; border-radius: 10px; background: #2563eb; color: white; padding: 12px 18px; font: inherit; cursor: pointer; transition: background .18s ease; }
+.sql-change-action button:hover { background: #1d4ed8; }

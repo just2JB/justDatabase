@@ -10,15 +10,17 @@ import RelationPage from './RelationPage'
 import QuizPage from './QuizPage'
 import SqlBasicsPage from './SqlBasicsPage'
 import SqlQueriesPage from './SqlQueriesPage'
+import SqlSubqueriesPage from './SqlSubqueriesPage'
+import SqlChangesPage from './SqlChangesPage'
 import { BigDataVisual, DatabaseVisual, MeaningVisual, ShapeVisual } from './Visuals'
 
 export default function App() {
   const [active, setActive] = useState('data')
   const [shape, setShape] = useState(0)
-  const [page, setPage] = useState<PageId>(() => { const initial = new URLSearchParams(window.location.search).get('page'); return initial === 'dbms' || initial === 'dbs' || initial === 'relation' || initial === 'quiz' || initial === 'sql4' || initial === 'sql5' ? initial : 'basics' })
+  const [page, setPage] = useState<PageId>(() => { const initial = new URLSearchParams(window.location.search).get('page'); return initial === 'dbms' || initial === 'dbs' || initial === 'relation' || initial === 'quiz' || initial === 'sql4' || initial === 'sql5' || initial === 'subqueries' || initial === 'changes' ? initial : 'basics' })
   const [destination, setDestination] = useState<SearchEntry | null>(null)
   const selected = shapes[shape]
-  const pageTitle = page === 'sql4' ? 'SQL 기초 · 테이블 정의' : page === 'sql5' ? 'SQL 검색 · 데이터 질의' : page === 'quiz' ? '문제 풀기' : page === 'relation' ? '관계 데이터 모델' : page === 'dbs' ? '데이터베이스 시스템' : page === 'dbms' ? '데이터베이스 관리 시스템' : '데이터베이스, 정보'
+  const pageTitle = page === 'subqueries' ? '부속질의' : page === 'changes' ? '데이터 삽입·수정·삭제' : page === 'sql4' ? 'SQL 기초 · 테이블 정의' : page === 'sql5' ? 'SQL 검색 · 데이터 질의' : page === 'quiz' ? '문제 풀기' : page === 'relation' ? '관계 데이터 모델' : page === 'dbs' ? '데이터베이스 시스템' : page === 'dbms' ? '데이터베이스 관리 시스템' : '데이터베이스, 정보'
 
   useEffect(() => {
     document.title = `${pageTitle} · justDatabase`
@@ -55,7 +57,7 @@ export default function App() {
     <main id="main">
       <header className="topbar"><span>개념 정리 <span className="slash">/</span> {pageTitle}</span><Search onSelect={selectSearchResult} /></header>
       <div className="document page-enter" key={page}>
-        {page === 'sql4' ? <SqlBasicsPage /> : page === 'sql5' ? <SqlQueriesPage key={destination?.sqlQuery ?? 1} initialQuery={destination?.sqlQuery ?? 1} /> : page === 'quiz' ? <QuizPage onLearn={selectSearchResult} /> : page === 'relation' ? <RelationPage /> : page === 'dbs' ? <DbsPage key={destination?.language ?? 0} initialLanguage={destination?.language ?? 0} /> : page === 'dbms' ? <DbmsPage key={destination?.model ?? 0} initialModel={destination?.model ?? 0} /> : <>
+        {page === 'subqueries' ? <SqlSubqueriesPage /> : page === 'changes' ? <SqlChangesPage /> : page === 'sql4' ? <SqlBasicsPage /> : page === 'sql5' ? <SqlQueriesPage key={destination?.sqlQuery ?? 1} initialQuery={destination?.sqlQuery ?? 1} /> : page === 'quiz' ? <QuizPage onLearn={selectSearchResult} /> : page === 'relation' ? <RelationPage /> : page === 'dbs' ? <DbsPage key={destination?.language ?? 0} initialLanguage={destination?.language ?? 0} /> : page === 'dbms' ? <DbmsPage key={destination?.model ?? 0} initialModel={destination?.model ?? 0} /> : <>
         <div className="page-heading"><h1>데이터베이스, 정보</h1><p>관측한 데이터가 의미 있는 정보가 되기까지.</p></div>
         <StudySection id="data" number="01" title="데이터와 정보">
           <div id="data-comparison" className="comparison"><article><div className="round-icon"><Icon /></div><div><h3>데이터 <small>Data</small></h3><p>1차적 자료, 현실세계에서 단순히 관측한 사실이나 값</p></div></article><article><div className="round-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20V12M12 20V4M18 20V8" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg></div><div><h3>정보 <small>Information</small></h3><p>관련성과 목적성을 갖춘 데이터</p></div></article></div>

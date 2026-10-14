@@ -9,7 +9,7 @@ import type { SearchEntry } from '../data/content'
 
 const normalize = (text: string) => text.toLocaleLowerCase().replace(/\s+/g, '')
 const allEntries: SearchEntry[] = [...searchEntries, ...dbmsSearchEntries, ...dbsSearchEntries, ...relationSearchEntries, ...sqlSearchEntries, ...advancedSearchEntries,
-  { title: '객관식 · OX 문제 풀기', text: '퀴즈 시험 연습 정답 해설 오답 다시 풀기', section: 'concept-quiz', page: 'quiz' },
+  { title: '개념 문제 풀이', text: '퀴즈 객관식 OX 시험 연습 정답 해설 오답 다시 풀기', section: 'concept-quiz', page: 'quiz' },
   { title: '릴레이션 직접 만들기', text: '실습 후보키 복합키 투플 행 열 선택 무결성', section: 'relation-practice', page: 'quiz' },
 ]
 

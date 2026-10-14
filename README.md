@@ -52,6 +52,8 @@ src/
 
 ## 주요 기능
 
+- 알고리즘 기초는 이해·5가지 조건·표기법·자료구조 섹션으로 구분. 설명 바로 아래 관련 그림을 배치하고 중복된 빅오 정의와 빈 시험 대비 섹션을 제거했습니다. 섹션과 목차의 연결은 `src/features/algorithm/data/algorithmSections.ts`에서 관리합니다.
+
 - 알고리즘 문제 풀이는 `?course=algorithm&topic=quiz`의 별도 페이지로 제공. 주제·객관식/OX 필터, 진행도·정답 수·해설 표시. 문항은 `data/algorithmQuestions.ts`, 화면은 `pages/AlgorithmQuizPage.tsx`에서 관리합니다(`src/features/algorithm/` 기준).
 
 - 알고리즘 단원마다 시험 대비 확인 문제 제공(객관식·OX 총 20개). 효율성 분석에서는 O/Ω/Θ 정의, c·n₀, 타이트한 상한, 반복 횟수 그림, 관계식 표를 보강. `src/features/algorithm/components/ExamReview.tsx`에서 관리합니다.

@@ -1,3 +1,4 @@
+import AlgorithmQuizPage from './AlgorithmQuizPage'
 import { useEffect, useState } from 'react'
 import PythonRunner from '../components/PythonRunner'
 import AlgorithmConcepts from '../components/AlgorithmConcepts'
@@ -5,11 +6,11 @@ import AlgorithmSidebar from '../components/AlgorithmSidebar'
 import AlgorithmSearch from '../components/AlgorithmSearch'
 import { algorithmLessons } from '../data/algorithmLessons'
 
-function initialPage() { const topic = new URLSearchParams(location.search).get('topic'); return topic === 'practice' || algorithmLessons.some(l => l.id === topic) ? topic! : 'foundations' }
+function initialPage() { const topic = new URLSearchParams(location.search).get('topic'); return topic === 'practice' || topic === 'quiz' || algorithmLessons.some(l => l.id === topic) ? topic! : 'foundations' }
 export default function AlgorithmPage() {
   const [page, setPage] = useState(initialPage)
   const [destination, setDestination] = useState<{ target: string } | null>(null)
-  const title = page === 'practice' ? 'Python 연습실' : algorithmLessons.find(l => l.id === page)?.title ?? '컴퓨터 알고리즘'
+  const title = page === 'quiz' ? '문제 풀기' : page === 'practice' ? 'Python 연습실' : algorithmLessons.find(l => l.id === page)?.title ?? '컴퓨터 알고리즘'
   useEffect(() => { document.title = `${title} · 컴퓨터 알고리즘 · justStudy` }, [title])
   useEffect(() => { if (destination) document.getElementById(destination.target)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' }) }, [destination])
   useEffect(() => {
@@ -22,5 +23,5 @@ export default function AlgorithmPage() {
     const url = new URL(location.href); url.searchParams.set('topic', topic); url.hash = target === 'main' ? '' : target; history.pushState(null, '', url)
     setPage(topic); setDestination({ target })
   }
-  return <div className="app-shell algorithm-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><AlgorithmSidebar page={page} onNavigate={navigate} /><main id="main"><header className="topbar"><span>컴퓨터 알고리즘 <span className="slash">/</span> {title}</span><AlgorithmSearch onNavigate={navigate} /></header><div className="document page-enter" key={page}>{page === 'practice' ? <><div className="page-heading"><h1>Python 연습실</h1><p>과제를 선택하고 코드를 직접 실행해 보세요.</p></div><PythonRunner /></> : <AlgorithmConcepts topic={page} onPractice={() => navigate('practice')} />}</div></main></div>
+  return <div className="app-shell algorithm-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><AlgorithmSidebar page={page} onNavigate={navigate} /><main id="main"><header className="topbar"><span>컴퓨터 알고리즘 <span className="slash">/</span> {title}</span><AlgorithmSearch onNavigate={navigate} /></header><div className="document page-enter" key={page}>{page === 'quiz' ? <AlgorithmQuizPage /> : page === 'practice' ? <><div className="page-heading"><h1>Python 연습실</h1><p>과제를 선택하고 코드를 직접 실행해 보세요.</p></div><PythonRunner /></> : <AlgorithmConcepts topic={page} onPractice={() => navigate('practice')} />}</div></main></div>
 }

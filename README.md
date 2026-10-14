@@ -52,6 +52,10 @@ src/
 
 ## 주요 기능
 
+- 알고리즘 문제 풀이는 `?course=algorithm&topic=quiz`의 별도 페이지로 제공. 주제·객관식/OX 필터, 진행도·정답 수·해설 표시. 문항은 `data/algorithmQuestions.ts`, 화면은 `pages/AlgorithmQuizPage.tsx`에서 관리합니다(`src/features/algorithm/` 기준).
+
+- 알고리즘 단원마다 시험 대비 확인 문제 제공(객관식·OX 총 20개). 효율성 분석에서는 O/Ω/Θ 정의, c·n₀, 타이트한 상한, 반복 횟수 그림, 관계식 표를 보강. `src/features/algorithm/components/ExamReview.tsx`에서 관리합니다.
+
 - 알고리즘 그림은 `AlgorithmDiagrams.tsx`의 SVG 배열·막대·컨테이너·호출 그림으로 구성하며 `HanoiVisual.tsx`는 원판 이동을 표시합니다. 두 파일은 `src/features/algorithm/components/`에 있습니다.
 
 - 알고리즘도 데이터베이스와 같은 왼쪽 목차·상단 검색·본문 구성. 주제 주소는 `?course=algorithm&topic=foundations`, Python 실습은 `?course=algorithm&topic=practice`입니다.

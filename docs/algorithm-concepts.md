@@ -18,5 +18,8 @@
 공개 참고 자료:
 - https://docs.python.org/3/tutorial/datastructures.html
 - https://opendsa-server.cs.vt.edu/ODSA/Books/fisd/cs3/fall-2020/1B_-_Adv_CS/html/GraphTraversal.html
+- https://ocw.mit.edu/courses/6-046j-introduction-to-algorithms-sma-5503-fall-2005/resources/lecture-2-asymptotic-notation-recurrences-substitution-master-method/
+
+시험 대비 보강: O/Ω/Θ 정의와 c·n₀, 느슨한 상한과 타이트한 차수 구별, 반복문의 합산·중첩·초기화, 로그의 밑, 순환관계식 초기 조건. n² 전체 비교와 n(n-1)/2 쌍 비교를 격자 그림으로 제시하고 6개 단원 총 20개 확인 문제를 추가했다. 실제 출제 보장 또는 확정 시험 범위라는 표현은 사용하지 않는다. 문제 풀이 상태는 페이지를 벗어나면 초기화되며 기존 Python 코드 저장과 별개다.
 
 테스트·빌드·브라우저 확인은 사용자 요청에 따라 수행하지 않았다.

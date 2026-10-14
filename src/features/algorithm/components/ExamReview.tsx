@@ -1,0 +1,11 @@
+import { useState } from 'react'
+import { StudySection } from '../../../shared/components/StudyComponents'
+
+function PairCount() {
+  const [n,setN] = useState(5)
+  return <div className="algo-visual"><h3>전체 비교와 중복 없는 쌍 비교</h3><label>n={n}<input type="range" min="2" max="8" value={n} onChange={e => setN(Number(e.target.value))} /></label><svg className="algo-diagram" viewBox="0 0 550 255" role="img" aria-label={`전체 ${n*n}회, i보다 큰 j만 비교 ${n*(n-1)/2}회`}><text x="30" y="22" fontSize="14">모든 (i,j): n² = {n*n}</text><text x="290" y="22" fontSize="14">i &lt; j: n(n-1)/2 = {n*(n-1)/2}</text>{Array.from({length:n*n},(_,k) => { const i=Math.floor(k/n), j=k%n; return <g key={k}><rect x={30+j*25} y={42+i*25} width="18" height="18" rx="3" fill="#2563eb" /><rect x={290+j*25} y={42+i*25} width="18" height="18" rx="3" fill={i<j ? '#28775c' : '#dfe6ef'} /></g> })}</svg><p>오른쪽은 같은 원소끼리와 역순 중복을 제외합니다. 비교 수는 줄지만 두 방식 모두 Θ(n²)입니다.</p></div>
+}
+
+export default function ExamReview({ topic }: { topic: string }) {
+  return <StudySection id={`exam-${topic}`} number="03" title="시험 대비 · 핵심 정리"><p className="algo-source-note">제공된 실습·퀴즈 참고 자료 유형을 바탕으로 만든 연습입니다. 실제 출제를 보장하거나 확정 시험 범위를 뜻하지 않습니다.</p>{topic === 'analysis' ? <><div className="algo-concept-grid"><article><h3>빅오의 정의를 문장으로</h3><p>0 ≤ f(n) ≤ c·g(n)이 모든 n ≥ n₀에서 성립하는 양의 상수 c와 n₀가 존재하면 f(n)=O(g(n))이다. Ω는 c·g(n) ≤ f(n), Θ는 c₁g(n) ≤ f(n) ≤ c₂g(n)이다.</p></article><article><h3>답안 작성 순서</h3><p>① n과 기본연산을 정한다 → ② 연산 횟수 식을 구한다 → ③ 가장 빠르게 커지는 항을 남긴다 → ④ 어떤 경우와 공간 기준인지 밝힌다. 몇 개 입력값의 비교만으로 모든 n에 대한 증명이 되지는 않는다.</p></article></div><PairCount /><div className="table-wrap"><table><caption>기억할 성장률과 관계식</caption><thead><tr><th>형태</th><th>결과</th><th>생각할 점</th></tr></thead><tbody>{[['1 < log n < n < n log n < n² < n³ < 2ⁿ < n!', '충분히 큰 n에서의 성장률 순서', '특정 작은 n의 값 순서와는 다르다'], ['T(n)=T(n-1)+Θ(1)', 'Θ(n)', '한 번에 1씩 줄인다'], ['T(n)=T(n/2)+Θ(1)', 'Θ(log n)', '절반 문제 하나만 푼다'], ['T(n)=2T(n-1)+1, T(0)=0', '2ⁿ-1, Θ(2ⁿ)', '하노이탑 이동 횟수'], ['3n²+100n+7', 'Θ(n²)', '계수와 낮은 차수 항 생략']].map(([a,b,c]) => <tr key={a}><td>{a}</td><td>{b}</td><td>{c}</td></tr>)}</tbody></table></div><p className="algo-caution">로그의 밑이 고정된 상수라면 차수는 같다. O(log n)과 O(log₂n)은 같은 성장률이다. 가장 타이트한 상한을 묻는지, 가능한 상한을 모두 묻는지 문제 문구를 확인하자.</p></> : null}<a className="algo-practice-link" href="?course=algorithm&amp;topic=quiz">객관식 · OX 문제 풀기 →</a></StudySection>
+}

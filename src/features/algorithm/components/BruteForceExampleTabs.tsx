@@ -13,7 +13,7 @@ const examples = [
 export default function BruteForceExampleTabs() {
   const [index, setIndex] = useState(() => {
     const concept = Number(location.hash.replace('#brute-force-', ''))
-    const found = examples.findIndex(item => item.indices.includes(concept) || location.hash.includes(item.id))
+    const found = examples.findIndex(item => item.indices.some(value => value === concept) || location.hash.includes(item.id))
     return found < 0 ? 0 : found
   })
   const current = examples[index]

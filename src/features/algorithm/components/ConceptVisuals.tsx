@@ -96,8 +96,9 @@ export function BinaryVisual() {
   if (!found) frames.push({ values: [...a], range: [low, high], text: `low=${low} > high=${high}. 빈 범위이므로 -1 반환.` })
   return <><div className="algo-controls">{[23, 50, 2, 91].map(n => <button key={n} aria-pressed={key === n} onClick={() => setKey(n)}>목표 {n}</button>)}</div><Timeline key={key} label="이진 탐색: 절반씩 제외하기" frames={frames} /></>
 }
-const graph: Record<string, string[]> = { A: ['B', 'C'], B: ['A', 'D'], C: ['A', 'E'], D: ['B'], E: ['C'] }
-const positions: Record<string, [number, number]> = { A: [180, 35], B: [90, 110], C: [270, 110], D: [90, 185], E: [270, 185] }
+const graph: Record<string, string[]> = { A: ['B', 'C'], B: ['A', 'D'], C: ['A', 'D', 'E'], D: ['B', 'C', 'F'], E: ['C', 'G', 'H'], F: ['D'], G: ['E', 'H'], H: ['E', 'G'] }
+const positions: Record<string, [number, number]> = { A: [55, 175], B: [195, 65], C: [195, 260], D: [345, 65], E: [345, 260], F: [505, 65], G: [505, 205], H: [505, 315] }
+const graphEdges = Object.entries(graph).flatMap(([a, neighbors]) => neighbors.filter(b => a < b).map(b => [a, b]))
 type GraphFrame = { visited: string[]; pending: string[]; text: string }
 function graphFrames(bfs: boolean) {
   const frames: GraphFrame[] = [{ visited: [], pending: ['A'], text: 'A에서 시작한다. 이웃은 알파벳순으로 확인한다.' }]
@@ -112,8 +113,8 @@ function graphFrames(bfs: boolean) {
   }
   return frames
 }
-export function GraphVisual() {
-  const [bfs, setBfs] = useState(false); const [step, setStep] = useState(0)
+export function GraphVisual({ mode }: { mode?: 'dfs' | 'bfs' }) {
+  const [bfs, setBfs] = useState(mode === 'bfs'); const [step, setStep] = useState(0)
   const frames = graphFrames(bfs); const frame = frames[step]
-  return <div className="algo-visual"><h3>그래프와 {bfs ? '큐' : '호출 스택'} 함께 보기</h3><div className="algo-controls">{[false, true].map(value => <button key={String(value)} aria-pressed={bfs === value} onClick={() => { setBfs(value); setStep(0) }}>{value ? 'BFS' : 'DFS'}</button>)}</div><svg className="algo-graph" viewBox="0 0 360 225" role="img" aria-label={`A-B, A-C, B-D, C-E 그래프. 방문 ${frame.visited.join(', ') || '없음'}`}>{[['A','B'],['A','C'],['B','D'],['C','E']].map(([a,b]) => <line key={a+b} x1={positions[a][0]} y1={positions[a][1]} x2={positions[b][0]} y2={positions[b][1]} stroke="#becbd7" strokeWidth="2" />)}{Object.entries(positions).map(([name,[x,y]]) => <g key={name}><circle cx={x} cy={y} r="20" fill={frame.visited.includes(name) ? '#28775c' : '#edf2f8'} /><text x={x} y={y+5} textAnchor="middle" fill={frame.visited.includes(name) ? 'white' : '#334155'}>{name}</text></g>)}</svg><p>방문: {frame.visited.join(' → ') || '없음'}</p><ContainerDiagram items={frame.pending} stack={!bfs} /><p aria-live="polite">{frame.text}</p><div className="algo-controls"><button disabled={step === 0} onClick={() => setStep(step-1)}>← 이전</button><span>{step+1} / {frames.length}</span><button disabled={step === frames.length-1} onClick={() => setStep(step+1)}>다음 →</button><button onClick={() => setStep(0)}>처음</button></div></div>
+  return <div className="algo-visual"><h3>그래프와 {bfs ? '큐' : '호출 스택'} 함께 보기</h3><div className="algo-controls" hidden={mode !== undefined}>{[false, true].map(value => <button key={String(value)} aria-pressed={bfs === value} onClick={() => { setBfs(value); setStep(0) }}>{value ? 'BFS' : 'DFS'}</button>)}</div><p>8개 정점 · 9개 간선 · A에서 시작 · 이웃은 알파벳순. A–B–D–C–A와 E–G–H–E의 사이클에서 방문 기록이 중복 탐색을 막습니다.</p><svg className="algo-graph" viewBox="0 0 560 360" role="img" aria-label={`정점 8개와 간선 9개, 사이클 A-B-D-C-A 및 E-G-H-E가 있는 무방향 그래프. 방문 ${frame.visited.join(', ') || '없음'}`}>{graphEdges.map(([a,b]) => <line key={a+b} x1={positions[a][0]} y1={positions[a][1]} x2={positions[b][0]} y2={positions[b][1]} stroke="#becbd7" strokeWidth="2" />)}{Object.entries(positions).map(([name,[x,y]]) => <g key={name}><circle cx={x} cy={y} r="22" stroke={frame.pending.includes(name) ? '#2563eb' : '#c8d4df'} strokeWidth={frame.pending.includes(name) ? 3 : 1} fill={frame.visited.includes(name) ? '#28775c' : '#edf2f8'} /><text x={x} y={y+5} textAnchor="middle" fill={frame.visited.includes(name) ? 'white' : '#334155'}>{name}</text></g>)}</svg><p>초록: 방문 완료 · 파란 테두리: 현재 스택/큐에 있는 정점</p><p>방문: {frame.visited.join(' → ') || '없음'}</p><ContainerDiagram items={frame.pending} stack={!bfs} /><p aria-live="polite">{frame.text}</p><div className="algo-controls"><button disabled={step === 0} onClick={() => setStep(step-1)}>← 이전</button><span>{step+1} / {frames.length}</span><button disabled={step === frames.length-1} onClick={() => setStep(step+1)}>다음 →</button><button onClick={() => setStep(0)}>처음</button></div></div>
 }

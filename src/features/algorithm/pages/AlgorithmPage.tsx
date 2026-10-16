@@ -22,5 +22,5 @@ export default function AlgorithmPage() {
     const url = new URL(location.href); url.searchParams.set('topic', topic); url.hash = target === 'main' ? '' : target; history.pushState(null, '', url)
     setPage(topic); setDestination({ target })
   }
-  return <div className="app-shell algorithm-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><AlgorithmSidebar page={page} onNavigate={navigate} /><main id="main"><header className="topbar"><span>컴퓨터 알고리즘 <span className="slash">/</span> {title}</span><AlgorithmSearch onNavigate={navigate} /></header><div className="document page-enter" key={page}>{page === 'quiz' ? <AlgorithmQuizPage /> : <AlgorithmConcepts topic={page} onPractice={() => navigate('quiz', 'python-practice')} />}</div></main></div>
+  return <div className="app-shell algorithm-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><AlgorithmSidebar page={page} onNavigate={navigate} /><main id="main"><header className="topbar"><span>컴퓨터 알고리즘 <span className="slash">/</span> {title}</span><AlgorithmSearch onNavigate={navigate} /></header><div className="document page-enter" key={page}>{page === 'quiz' ? <AlgorithmQuizPage /> : <AlgorithmConcepts topic={page} onJump={target => navigate(page, target)} onPractice={() => navigate('quiz', 'python-practice')} />}</div></main></div>
 }

@@ -1,0 +1,12 @@
+export default function ListSplitTree({ values, depth, sums = false }: { values: number[]; depth: number; sums?: boolean }) {
+  const levels = Math.log2(values.length)
+  const nodes = Array.from({length: levels + 1}, (_, level) => {
+    const count = 2 ** level, size = values.length / count
+    return Array.from({length: count}, (_, i) => ({ x: (i + .5) * 800 / count, y: 45 + level * 110, group: values.slice(i * size, (i + 1) * size), level, i }))
+  })
+  return <div className="list-split-scroll"><svg className="list-split-tree" viewBox={`0 0 800 ${levels * 110 + 100}`} role="img" aria-label={`${values.join(', ')}를 절반씩 분할하는 트리${sums ? ', 각 구간의 합 표시' : ''}`}>
+    <defs><marker id={sums?'sum-tree-arrow':'merge-tree-arrow'} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10Z" fill="#6b9b7e"/></marker></defs>
+    {nodes.slice(1).flatMap((row, level) => row.map(node => { const parent = nodes[level][Math.floor(node.i / 2)]; return <g key={`${node.level}-${node.i}`} opacity={node.level <= depth ? 1 : .15}><path d={sums ? `M${node.x} ${node.y-23} L${parent.x} ${parent.y+25}` : `M${parent.x} ${parent.y+25} L${node.x} ${node.y-23}`} stroke="#6b9b7e" strokeWidth="2" fill="none" markerEnd={`url(#${sums?'sum-tree-arrow':'merge-tree-arrow'})`}/>{node.i%2===0 ? <text x={(node.x+parent.x)/2-20} y={(node.y+parent.y)/2} fontSize="12" fill="#526c60">{sums?'더하기':'왼쪽 절반'}</text> : !sums ? <text x={(node.x+parent.x)/2+8} y={(node.y+parent.y)/2} fontSize="12" fill="#526c60">오른쪽 절반</text> : null}</g> }))}
+    {nodes.flatMap(row => row.map(node => {const width=Math.max(54,node.group.length*32+22);return <g key={`${node.level}-${node.i}`} opacity={node.level<=depth?1:.15}><rect x={node.x-width/2} y={node.y-22} width={width} height="44" rx="9" fill={sums?'#def0e4':node.level===depth?'#e2edff':'#fff'} stroke={node.level===depth?'#467ac1':'#a4c4af'} strokeWidth="2"/><text x={node.x} y={node.y+5} textAnchor="middle" fill="#244738" fontSize="17" fontWeight="600">{sums ? node.group.reduce((a,b)=>a+b,0) : node.group.join('  ')}</text>{node.group.length===1 && node.level<=depth?<text x={node.x} y={node.y+41} textAnchor="middle" fontSize="11" fill="#61766b">{sums?'원래 값':'분할 종료'}</text>:null}</g>}))}
+  </svg></div>
+}

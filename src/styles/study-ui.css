@@ -44,3 +44,14 @@
 .exam-short-answer[aria-invalid=true]{border-color:#d94c4c;background:#fff5f5;color:#a32424}
 .exam-questions>.exam-question[data-result=incorrect]{border-color:#df8e8e;background:#fffafa}
 .exam-questions>.exam-question[data-result=correct]{border-color:#a4cdb4;background:#fbfefc}
+
+/* Keep the two mobile contents controls on one compact, shared row. */
+@media(max-width:760px){
+ .app-shell .document{padding-bottom:calc(106px + env(safe-area-inset-bottom))}
+ .mobile-toc-trigger,.lesson-contents-trigger{bottom:calc(12px + env(safe-area-inset-bottom));width:calc(50vw - 18px);min-height:46px;padding:10px 12px;font-size:13px;border-radius:14px;box-shadow:0 4px 18px #1732511c}
+ .mobile-toc-trigger{left:12px;right:auto;justify-content:center;gap:8px}
+ .mobile-toc-trigger svg{width:17px;height:17px}
+ .lesson-contents-trigger{right:12px;left:auto;background:#fff;color:#295b9d;border:1px solid #c4d7f2}
+ body:not(:has(.lesson-contents-trigger)) .mobile-toc-trigger{left:auto;right:12px;width:auto;min-width:130px}
+ .floating-contents.lesson-contents{bottom:calc(72px + env(safe-area-inset-bottom));max-height:calc(100dvh - 110px)}
+}

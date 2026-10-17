@@ -31,14 +31,26 @@ export function MeaningVisual() {
 }
 
 const dbSteps = [
-  { title: '통합', text: '여러 사용자가 사용할 데이터를 하나의 데이터베이스에 모읍니다.' },
-  { title: '저장', text: '모은 데이터를 데이터베이스에 저장합니다.' },
+  { title: '통합', text: '서로 다른 업무에서 공통으로 쓰는 학생 정보를 모으고 불필요한 중복을 줄입니다.' },
+  { title: '저장', text: '필요할 때 다시 사용할 수 있도록 학생 정보를 저장 장치에 기록합니다.' },
   { title: '공유', text: '여러 사용자가 같은 데이터베이스를 함께 사용합니다.' },
-  { title: '운영', text: '조직에 필요한 데이터를 사용하고, 변하는 값을 삽입·삭제·수정합니다.' },
+  { title: '운영', text: '단순히 모아 둔 자료가 아니라 학사 업무를 수행하는 데 필요한 학생 데이터를 관리합니다.' },
 ]
 export function DatabaseVisual() {
   const [step, setStep] = useState(0)
-  return <><div className="visual-block"><div className="visual-header"><h3>하나의 데이터베이스, 여러 사용자</h3></div><div className={`database-map step-${step}`} aria-label="여러 사용자가 하나의 데이터베이스에 연결되는 개념도"><div className="user-nodes">{['사용자 A', '사용자 B', '사용자 C'].map(user => <div key={user}><Icon /><span>{user}</span></div>)}</div><div className="map-connectors" aria-hidden="true"><svg viewBox="0 0 150 150" preserveAspectRatio="none"><path d="M0 25H60V75H150M0 75H150M0 125H60V75" /></svg></div><div className="database-node"><Icon kind="database" /><strong>데이터베이스</strong><span>조직의 운영 데이터</span></div></div><div className="concept-controls" aria-label="데이터베이스 핵심 개념">{dbSteps.map((item, index) => <button type="button" key={item.title} aria-pressed={step === index} onClick={() => setStep(index)}>{item.title}</button>)}</div><p key={step} className="concept-description content-enter" aria-live="polite"><strong>{dbSteps[step].title}</strong>{dbSteps[step].text}</p><p className="visual-caption">정의의 네 가지 핵심 단어를 눌러 관계를 살펴보세요.</p></div></>
+  const [promoted, setPromoted] = useState(false)
+  const grade = promoted ? 2 : 1
+  return <div className="visual-block"><div className="visual-header"><h3>같은 학생 데이터로 보는 통합·저장·공유·운영</h3></div>
+    <div className="concept-controls" aria-label="데이터베이스 핵심 개념">{dbSteps.map((item,index)=><button type="button" key={item.title} aria-pressed={step===index} onClick={()=>setStep(index)}>{item.title}</button>)}</div>
+    <div key={step} className="db-aspect-scene content-enter">
+      <h4>{['업무마다 겹치는 학생 정보를 모으기','학생 정보를 표의 값으로 기록하기','같은 데이터를 여러 업무에서 이용하기','실제 학사 업무에 필요한 현재 데이터'][step]}</h4>
+      {step===0?<div className="db-aspect-flow"><div className="db-source-records">{['학사','장학','도서관'].map(label=><span key={label}>{label} 파일 · 101 / 김하늘 / {grade}학년</span>)}</div><Icon kind="arrow"/><div className="db-merged-record"><strong>공통 학생 정보</strong><span>101 / 김하늘 / {grade}학년</span><small>겹치는 정보를 일관되게 관리</small></div></div>:<>
+        <div className="table-wrap"><table><caption className="sr-only">공통 학생 데이터</caption><thead><tr><th>학생번호</th><th>이름</th><th>학년</th></tr></thead><tbody><tr className={step===3&&promoted?'db-row-changed':''}><td>101</td><td>김하늘</td><td>{grade}학년</td></tr></tbody></table></div>
+        {step===1?<p className="learning-result"><Icon kind="database"/> 저장된 값을 나중에 다시 조회해 사용할 수 있습니다.</p>:step===2?<div className="db-share-users">{['학사 담당자','장학 담당자','도서관 담당자'].map(label=><span key={label}>{label}<b>↕ 같은 학생 101 참조</b></span>)}</div>:<><button type="button" className="visual-button" onClick={()=>setPromoted(value=>!value)}>{promoted?'진급 전으로 되돌리기':'진급 반영 · 1학년 → 2학년'}</button><p className="learning-result" role="status">{promoted?'학년을 2로 수정했습니다. 공유 관점에서도 같은 2학년 값이 보입니다.':'진급 업무에 맞춰 현재 학년을 관리합니다. 버튼으로 학년을 바꿔 보세요.'}</p></>}
+      </>}
+    </div>
+    <p className="concept-description" aria-live="polite"><strong>{dbSteps[step].title} 데이터</strong>{dbSteps[step].text}</p><p className="visual-caption">네 단어는 처리 순서가 아니라 데이터베이스를 설명하는 네 가지 관점입니다.</p>
+  </div>
 }
 
 export function ShapeVisual({ shape }: { shape: number }) {

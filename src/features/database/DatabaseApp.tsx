@@ -15,6 +15,7 @@ import SqlQueriesPage from './sql/pages/SqlQueriesPage'
 import SqlSubqueriesPage from './sql/pages/SqlSubqueriesPage'
 import SqlChangesPage from './sql/pages/SqlChangesPage'
 import { BigDataVisual, DatabaseVisual, MeaningVisual, ShapeVisual } from './components/Visuals'
+import './database-study.css'
 
 const WorkbenchPage = lazy(() => import('./workbench/WorkbenchPage'))
 
@@ -79,7 +80,7 @@ export default function DatabaseApp() {
     setDestination(entry)
   }
 
-  return <div className="app-shell">
+  return <div className="app-shell database-study-shell">
     <a className="skip-link" href="#main">본문으로 이동</a>
     <Sidebar active={active} page={page} onSelect={selectSearchResult} />
     <main id="main">

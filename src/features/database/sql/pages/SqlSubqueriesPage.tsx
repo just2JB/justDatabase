@@ -6,14 +6,27 @@ import { advancedExamples, highestBook, subqueryExercises } from '../data/sqlAdv
 
 function SubqueryFlow() {
   const [step, setStep] = useState(0)
-  return <div className="visual-block"><h3>가장 비싼 도서를 찾는 흐름</h3><div className="sql-option-buttons">{['내부 질의', '외부 조건', '최종 결과'].map((label, i) => <button type="button" key={label} aria-pressed={step === i} onClick={() => setStep(i)}>{i + 1}. {label}</button>)}</div><div className="sql-clause-flow"><span>MAX(price) → 35,000</span><span>→ price = 35,000</span><span>→ 골프 바이블</span></div><div key={step} className="content-enter"><SqlCode>{step === 0 ? 'SELECT MAX(price) FROM Book;' : step === 1 ? 'SELECT bookname FROM Book WHERE price = 35000;' : queryExamples[27].code}</SqlCode><SqlTable caption={['내부 결과 · 한 값', '조건에 맞는 도서', '외부 결과'][step]} data={step === 0 ? { columns: ['MAX(price)'], rows: [[35000]] } : { columns: ['bookname', 'price'], rows: highestBook.map(b => [b.bookname, b.price]) }} /></div><p className="visual-caption">이해를 위한 논리적 흐름이다. 실제 DBMS는 실행 계획에 따라 처리한다.</p></div>
+  const maximum = Math.max(...books.map(book=>book.price))
+  const steps = ['최고가 한 값 계산', '그 값으로 행 선택', '한 SQL로 표현']
+  const codes = ['SELECT MAX(price) FROM Book;', `SELECT bookname, price FROM Book\nWHERE price = ${maximum};`, queryExamples[27].code]
+  const data = step===0 ? {columns:['MAX(price)'],rows:[[maximum]]} : step===1 ? {columns:['bookname','price'],rows:highestBook.map(book=>[book.bookname,book.price])} : queryExamples[27].result()
+  return <div className="visual-block" id="subquery-flow-demo"><h3>가장 비싼 도서 · 내부 결과가 외부 조건이 되는 과정</h3>
+    <div className="sql-learning-step" role="group" aria-label="부속질의 처리 단계">{steps.map((label,index)=><button type="button" key={label} aria-pressed={step===index} onClick={()=>setStep(index)}><span>{index+1}</span>{label}</button>)}</div>
+    <p className="sql-stage-summary" role="status"><strong>{steps[step]}</strong>{[
+      '모든 도서의 가격에서 MAX가 35000이라는 한 값을 구합니다. 도서 이름은 이 내부 결과에 포함되지 않습니다.',
+      '내부에서 구한 35000을 외부의 price와 비교해 같은 가격인 행을 찾습니다. 확인을 위해 이름과 가격을 함께 표시합니다.',
+      '35000을 직접 적는 대신 내부 SELECT를 넣었습니다. 최종 SELECT가 bookname만 요청하므로 결과에도 도서 이름 한 열만 나옵니다.',
+    ][step]}</p>
+    <div key={step} className="content-enter"><SqlCode>{codes[step]}</SqlCode><SqlTable caption={['내부 결과 · 한 열의 한 값','조건으로 고른 행 · 확인용 두 열','최종 질의의 결과 · 이름 한 열'][step]} data={data}/></div>
+    <p className="visual-caption">개념을 이해하는 논리적 순서입니다. 실제 DBMS의 실행 방식은 실행 계획에 따라 달라질 수 있습니다.</p>
+  </div>
 }
 function CorrelatedFlow() {
   const [id, setId] = useState(1)
   const book = books.find(b => b.bookid === id) ?? books[0]
   const peers = books.filter(b => b.publisher === book.publisher)
   const average = peers.reduce((n, b) => n + b.price, 0) / peers.length
-  return <div className="visual-block"><label className="relation-select">비교할 외부 도서<select value={id} onChange={e => setId(Number(e.target.value))}>{books.map(b => <option key={b.bookid} value={b.bookid}>{b.bookname}</option>)}</select></label><div key={id} className="content-enter"><div className="sql-clause-flow"><span>{book.bookname} · {book.price.toLocaleString()}원</span><span>→ {book.publisher} 평균</span><span>{Math.round(average).toLocaleString()}원</span></div><SqlTable caption="내부 질의가 평균을 구하는 도서" data={{ columns: ['bookname', 'publisher', 'price'], rows: peers.map(b => [b.bookname, b.publisher, b.price]) }} /><p className="sql-explanation"><strong>{book.price > average ? '결과에 포함' : '결과에서 제외'}</strong> · {book.price.toLocaleString()} {book.price > average ? '>' : '≤'} {average.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}. 평균과 같으면 ‘초과’ 조건을 만족하지 않는다.</p></div></div>
+  return <div className="visual-block"><label className="relation-select">비교할 외부 도서<select value={id} onChange={e => setId(Number(e.target.value))}>{books.map(b => <option key={b.bookid} value={b.bookid}>{b.bookname}</option>)}</select></label><div key={id} className="content-enter"><div className="sql-clause-flow"><span>{book.bookname} · {book.price.toLocaleString()}원</span><span>→ {book.publisher} 평균</span><span>{average.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}원</span></div><p className="sql-stage-summary"><strong>이 출판사의 평균만 계산</strong>{peers.map(peer=>peer.price.toLocaleString()).join(" + ")} = {peers.reduce((sum,peer)=>sum+peer.price,0).toLocaleString()}원 · {peers.length}권으로 나눕니다.</p><SqlTable caption="내부 질의가 평균을 구하는 도서" data={{ columns: ['bookname', 'publisher', 'price'], rows: peers.map(b => [b.bookname, b.publisher, b.price]) }} /><p className="sql-explanation"><strong>{book.price > average ? '결과에 포함' : '결과에서 제외'}</strong> · {book.price.toLocaleString()} {book.price > average ? '>' : '≤'} {average.toLocaleString('ko-KR', { maximumFractionDigits: 2 })}. 평균과 같으면 ‘초과’ 조건을 만족하지 않는다.</p></div></div>
 }
 export default function SqlSubqueriesPage() {
   const [selected, setSelected] = useState(0)

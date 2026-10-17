@@ -1,17 +1,7 @@
 import { useState } from 'react'
 import { Icon, StudySection } from '../../../shared/components/StudyComponents'
+import FileComparisonVisual from '../components/FileComparisonVisual'
 import { advantages, dbmsFunctions, disadvantages, generations, models } from '../data/dbmsContent'
-
-function FileComparison() {
-  const [managed, setManaged] = useState(false)
-  return <div className="visual-block"><div className="visual-header"><h3>같은 데이터를 어디에서 관리할까?</h3><button type="button" className="visual-button" aria-pressed={managed} onClick={() => setManaged(value => !value)}>{managed ? '파일 시스템 보기' : 'DBMS로 모으기'}</button></div>
-    <div className={`file-comparison ${managed ? 'managed' : ''}`} role="group" aria-label={managed ? '학사·도서관·장학 프로그램이 하나의 DBMS에 연결되는 구조' : '프로그램마다 별도 파일을 관리하는 구조'}>
-      <div className="program-rows">{['학사 프로그램', '도서관 프로그램', '장학 프로그램'].map(label => <div className="program-row" key={label}><span>{label}</span>{managed ? null : <><Icon kind="arrow" /><div className="file-record"><Icon /><span>학생 A · 1학년</span></div></>}</div>)}</div>
-      {managed ? <><div className="dbms-connections" aria-hidden="true"><svg viewBox="0 0 160 150" preserveAspectRatio="none"><g className="dbms-connection-lines"><path d="M0 21H60Q72 21 72 33V63Q72 75 84 75H158" /><path d="M0 75H158" /><path d="M0 129H60Q72 129 72 117V87Q72 75 84 75H158" /></g><path className="dbms-connection-arrow" d="m149 68 9 7-9 7" /></svg><span>공통 데이터에 접근</span></div><div className="managed-store"><strong>DBMS</strong><Icon kind="database" /><span>학생 A · 1학년</span><small>통합된 데이터베이스</small></div></> : null}
-    </div>
-    <p className="concept-description" aria-live="polite">{managed ? 'DBMS가 데이터를 통합하여 저장·관리하고, 여러 응용 프로그램이 함께 사용합니다.' : '응용 프로그램마다 별도의 파일을 관리하면 같은 학생 데이터가 여러 곳에 중복 저장됩니다.'}</p><p className="visual-caption">개념 이해를 위한 예시</p>
-  </div>
-}
 
 function FunctionVisual() {
   const [selected, setSelected] = useState(0)
@@ -29,7 +19,7 @@ export default function DbmsPage({ initialModel = 0 }: { initialModel?: number }
   const [model, setModel] = useState(initialModel)
   return <><div className="page-heading"><h1>데이터베이스 관리 시스템</h1><p>DBMS · 데이터를 통합하여 저장하고 관리하는 소프트웨어</p></div>
     <StudySection id="dbms-intro" number="01" title="DBMS와 등장 배경"><div className="definition"><div className="round-icon"><Icon kind="database" /></div><p><strong>DBMS</strong> (Database Management System)는 조직에 필요한 데이터를 데이터베이스에 <strong>통합</strong>하여 <strong>저장</strong>하고 <strong>관리</strong>한다.</p></div>
-      <div id="file-system" className="dbms-text"><h3>파일 시스템</h3><p>파일을 생성, 삭제, 수정, 검색하여 데이터를 파일로 관리하는 소프트웨어. 응용 프로그램별로 필요한 데이터를 별도의 파일로 관리한다.</p></div><FileComparison />
+      <div id="file-system" className="dbms-text"><h3>파일 시스템</h3><p>파일을 생성, 삭제, 수정, 검색하여 데이터를 파일로 관리하는 소프트웨어. 응용 프로그램별로 필요한 데이터를 별도의 파일로 관리한다.</p></div><FileComparisonVisual />
       <h3 id="file-problems" className="subheading">파일 시스템의 한계</h3><dl className="feature-list"><div><dt>데이터 중복성</dt><dd>같은 내용의 데이터가 여러 파일에 중복 저장된다.</dd></div><div><dt>데이터 종속성</dt><dd>응용 프로그램이 데이터 파일에 종속적이다.</dd></div><div><dt>관리 기능 부족</dt><dd>동시 공유, 보안, 회복 기능이 부족하다.</dd></div><div><dt>개발의 어려움</dt><dd>응용 프로그램을 개발하기 쉽지 않다.</dd></div></dl><p className="dbms-callout">파일 시스템의 한계를 해결하기 위해 제시된 소프트웨어가 <strong>DBMS</strong>이다.</p>
     </StudySection>
     <StudySection id="dbms-management" number="02" title="DBMS에서의 데이터 관리"><FunctionVisual /><div id="dbms-tradeoffs" className="dbms-tradeoffs"><article><h3>장점</h3><ul>{advantages.map(item => <li key={item}>{item}</li>)}</ul></article><article><h3>단점</h3><ul>{disadvantages.map(item => <li key={item}>{item}</li>)}</ul></article></div></StudySection>

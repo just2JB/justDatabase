@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { pushLocation, scrollToTarget } from '../../shared/navigation'
 import { Icon, StudySection } from '../../shared/components/StudyComponents'
 import { features, shapes, types, uses } from './data/content'
 import type { PageId, SearchEntry } from './data/content'
@@ -14,11 +15,21 @@ import SqlSubqueriesPage from './sql/pages/SqlSubqueriesPage'
 import SqlChangesPage from './sql/pages/SqlChangesPage'
 import { BigDataVisual, DatabaseVisual, MeaningVisual, ShapeVisual } from './components/Visuals'
 
+function readPage():PageId {
+  const value=new URLSearchParams(location.search).get('page')
+  return value==='dbms'||value==='dbs'||value==='relation'||value==='quiz'||value==='sql4'||value==='sql5'||value==='subqueries'||value==='changes'?value:'basics'
+}
+function readDestination():SearchEntry {
+  const params=new URLSearchParams(location.search)
+  const result:SearchEntry={title:'',text:'',section:location.hash.slice(1)||'main',page:readPage()}
+  for(const name of ['shape','model','language','sqlQuery'] as const){const value=params.get(name);if(value!==null&&Number.isInteger(Number(value))&&Number(value)>=0)result[name]=Number(value)}
+  return result
+}
 export default function DatabaseApp() {
   const [active, setActive] = useState('data')
-  const [shape, setShape] = useState(0)
-  const [page, setPage] = useState<PageId>(() => { const initial = new URLSearchParams(window.location.search).get('page'); return initial === 'dbms' || initial === 'dbs' || initial === 'relation' || initial === 'quiz' || initial === 'sql4' || initial === 'sql5' || initial === 'subqueries' || initial === 'changes' ? initial : 'basics' })
-  const [destination, setDestination] = useState<SearchEntry | null>(null)
+  const [shape, setShape] = useState(()=>Math.min(readDestination().shape??0,shapes.length-1))
+  const [page, setPage] = useState<PageId>(readPage)
+  const [destination, setDestination] = useState<SearchEntry>(readDestination)
   const selected = shapes[shape]
   const pageTitle = page === 'subqueries' ? '부속질의' : page === 'changes' ? '데이터 삽입·수정·삭제' : page === 'sql4' ? 'SQL 기초 · 테이블 정의' : page === 'sql5' ? 'SQL 검색 · 데이터 질의' : page === 'quiz' ? '문제 풀기' : page === 'relation' ? '관계 데이터 모델' : page === 'dbs' ? '데이터베이스 시스템' : page === 'dbms' ? '데이터베이스 관리 시스템' : '데이터베이스, 정보'
 
@@ -34,18 +45,27 @@ export default function DatabaseApp() {
 
   useEffect(() => {
     if (!destination) return
-    document.getElementById(destination.target ?? destination.section)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
+    scrollToTarget(destination.target ?? destination.section)
   }, [destination])
 
+  useEffect(()=>{
+    const restore=()=>{const entry=readDestination();setPage(readPage());setActive(entry.section);setDestination(entry);setShape(Math.min(entry.shape??0,shapes.length-1))}
+    window.addEventListener('popstate',restore)
+    return()=>window.removeEventListener('popstate',restore)
+  },[])
+
   function selectSearchResult(entry: SearchEntry) {
-    if (entry.page === 'quiz') {
-      const url = new URL(location.href)
-      url.searchParams.set('page', 'quiz')
-      if (entry.section === 'relation-practice') url.searchParams.set('view', 'practice')
-      else url.searchParams.delete('view')
-      window.history.replaceState(null, '', url)
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    }
+    const url=new URL(location.href)
+    url.searchParams.set('course','database')
+    url.searchParams.delete('topic')
+    const next=entry.page??'basics'
+    if(next==='basics')url.searchParams.delete('page');else url.searchParams.set('page',next)
+    if(next==='quiz'&&entry.section==='relation-practice')url.searchParams.set('view','practice');else url.searchParams.delete('view')
+    for(const name of ['shape','model','language','sqlQuery'] as const){if(entry[name]!==undefined)url.searchParams.set(name,String(entry[name]));else url.searchParams.delete(name)}
+    const target=entry.target??entry.section
+    url.hash=target==='main'?'':target
+    pushLocation(url)
+    if(next==='quiz'&&page==='quiz')window.dispatchEvent(new PopStateEvent('popstate'))
     setActive(entry.section)
     setPage(entry.page ?? 'basics')
     if (entry.shape !== undefined) setShape(entry.shape)

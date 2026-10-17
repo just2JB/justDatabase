@@ -1,0 +1,28 @@
+:root{--diagram-duration:620ms;--diagram-ease:cubic-bezier(.22,.68,.2,1)}
+.diagram-motion-stage{min-width:0;isolation:isolate}
+.diagram-motion-stage .motion-value>rect,.diagram-motion-stage .motion-value>text{transition:fill 220ms,opacity 220ms}
+.motion-value{transition:opacity 220ms}
+.motion-range{transition:x var(--diagram-duration) var(--diagram-ease),width var(--diagram-duration) var(--diagram-ease),fill 220ms}
+.step-controls{margin:20px 0;padding:12px 14px;border:1px solid #d3dfeb;border-radius:12px;background:#fff;min-width:0}
+.step-controls-main,.step-controls-extra{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px}
+.step-controls button,.step-controls select{min-height:40px;padding:9px 12px;border:1px solid #c7d7e6;border-radius:8px;background:#f8fafc;color:#344f70;font:inherit;font-size:12px;cursor:pointer;transition:background-color 180ms,border-color 180ms}
+.step-controls button:disabled{opacity:.4;cursor:default}.step-controls button:not(:disabled):hover{background:#eaf2ff;border-color:#7397cb}
+.step-controls .step-play{background:#e9f1ff;color:#1754ab;min-width:113px}.step-controls .step-play[aria-pressed=true]{background:#1754ab;color:#fff}
+.step-controls-main>span{min-width:64px;text-align:center;font-size:12px;font-variant-numeric:tabular-nums;color:#61758e}
+.step-controls-extra{margin-top:9px}.step-controls-extra button{background:transparent;border-color:transparent}.step-controls-extra label{display:flex;align-items:center;gap:7px;font-size:12px;color:#61758e}.step-controls select{padding:6px 9px}
+.step-track{height:4px;overflow:hidden;background:#eaf0f7;border-radius:5px;margin-top:12px}.step-track>span{display:block;height:100%;background:#5288cd;transition:width var(--diagram-duration) var(--diagram-ease)}
+.search-array>span{position:relative;transition:background-color 250ms,border-color 250ms}.search-array{margin-top:34px}
+.search-cursor{position:absolute;top:-27px;left:calc(50% - 8px);font-style:normal;font-size:23px;font-weight:700;color:#2563eb;line-height:24px}
+.search-motion-visual .moving-pattern{min-width:0}.moving-pattern>span{transition:background-color 250ms,color 250ms}
+.moving-pair{transition:x1 var(--diagram-duration),x2 var(--diagram-duration),y1 var(--diagram-duration),y2 var(--diagram-duration)}
+.closest-example-graph circle{transition:r 300ms,fill 300ms}
+.graph-motion-visual>.step-controls{grid-column:1/-1}.graph-motion-visual>.container-motion-stage{grid-column:2;grid-row:3;display:flex;align-items:center;justify-content:center}.graph-motion-visual .container-motion-stage>.algo-diagram{max-height:270px}
+.motion-edge{stroke-dasharray:1;animation:diagram-draw var(--diagram-duration) ease-out}.graph-current-ring{animation:diagram-focus 620ms ease-out;transform-box:fill-box;transform-origin:center}
+.split-tree-node{transition:opacity var(--diagram-duration)}.split-tree-edge{transition:stroke-dashoffset var(--diagram-duration) ease-out}
+.motion-reveal{animation:diagram-arrive 420ms ease-out}
+.meaning-result.revealed,.value-unit{transition:opacity 420ms,background-color 420ms,transform 420ms}.meaning-result.revealed{animation:diagram-arrive 420ms ease-out}
+@keyframes diagram-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes diagram-focus{from{opacity:.35;transform:scale(1.3)}to{opacity:1;transform:scale(1)}}
+@keyframes diagram-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:760px){.step-controls{padding:10px}.step-controls button,.step-controls select{min-height:44px}.step-controls-main{gap:6px}.step-controls-main>span{min-width:52px}.step-controls .step-play{flex-basis:100%}.graph-motion-visual>.container-motion-stage{display:block}.step-controls-extra label select{font-size:16px}.search-cursor{top:-25px}}
+@media(prefers-reduced-motion:reduce){.motion-value,.motion-range,.step-track>span,.search-array>span,.moving-pattern>span,.moving-pair,.closest-example-graph circle,.split-tree-node,.split-tree-edge,.step-controls button,.step-controls select,.meaning-result.revealed,.value-unit{transition:none!important}.motion-edge,.graph-current-ring,.motion-reveal,.meaning-result.revealed{animation:none!important}}

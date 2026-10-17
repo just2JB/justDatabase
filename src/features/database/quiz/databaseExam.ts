@@ -1,0 +1,36 @@
+import type { PracticeQuestion } from '../../../shared/components/ExamSession'
+const choice=(id:string,prompt:string,options:string[],correct:number,explanation:string):PracticeQuestion=>({id,kind:'choice',prompt,options,correct,answer:options[correct],explanation})
+const blank=(id:string,prompt:string,answer:string,accepted:string[],explanation:string,code?:string):PracticeQuestion=>({id,kind:'blank',prompt,answer,accepted,explanation,code})
+export const databaseExamKinds={choice:'객관식',blank:'빈칸 채우기'}
+export const databaseExam:PracticeQuestion[]=[
+  choice('db-ex-01','학생 정보 파일을 학과별로 따로 관리해 같은 학생 주소가 서로 다르다. 가장 직접적인 문제는?',['자료형 불일치','데이터 중복에 따른 불일치','데이터 독립성','스키마 최소성'],1,'같은 데이터의 중복 저장은 갱신 시 불일치를 일으킬 수 있다.'),
+  choice('db-ex-02','DBMS와 데이터베이스를 올바르게 구분한 것은?',['둘 다 데이터 집합','DBMS는 관리 소프트웨어, DB는 데이터 집합','DBMS는 SQL 문장만 의미','DB는 운영체제'],1,'학생 데이터 집합이 DB이고 이를 관리하는 MySQL 같은 소프트웨어가 DBMS다.'),
+  choice('db-ex-03','저장 장치와 파일 배치 변경을 담당하는 스키마는?',['외부','개념','내부','사용자'],2,'내부 스키마는 물리적 저장 구조를 기술한다.'),
+  choice('db-ex-04','전체 논리적 구조를 정의하며 3단계 구조에서 하나인 스키마는?',['외부','개념','내부 사용자별 스키마','뷰마다의 스키마'],1,'개념 스키마는 전체 논리 구조이며 외부 스키마는 여러 개 가능하다.'),
+  choice('db-ex-05','릴레이션의 인스턴스에 대한 설명은?',['항상 고정된 속성 정의','특정 시점의 실제 투플 집합','DBMS 프로그램 코드','저장 주소만의 목록'],1,'인스턴스는 데이터 변경에 따라 달라지는 실제 상태다.'),
+  choice('db-ex-06','학생(학번,이름,학과,연락처)에 12개 투플이 있다. 차수와 카디널리티는?',['12,4','4,12','16,48','4,4'],1,'차수는 속성 수 4, 카디널리티는 투플 수 12다.'),
+  choice('db-ex-07','키로 제시된 속성 집합에서 속성을 하나 제거해도 여전히 모든 투플을 구별한다면?',['최소성을 만족하지 않는다','유일성을 만족하지 않는다','외래키가 된다','무조건 기본키다'],0,'후보키는 유일성과 최소성을 모두 만족해야 한다. 이 집합은 유일성은 있지만 불필요한 속성이 있으므로 후보키가 아니다.'),
+  choice('db-ex-08','복합 기본키 (학생번호,과목번호)에서 과목번호가 NULL이다. 위반하는 조건은?',['참조 무결성만','개체 무결성','속성 순서','카디널리티'],1,'기본키를 구성하는 모든 속성은 NULL일 수 없다.'),
+  choice('db-ex-09','외래키 학과번호가 여러 학생 행에서 같은 값을 갖는 것은?',['항상 오류','항상 개체 무결성 위반','참조 대상이 존재하면 허용될 수 있다','후보키 최소성 위반'],2,'외래키 자체에는 유일성이 요구되지 않는다. 다른 제약이 없다면 중복 가능하다.'),
+  choice('db-ex-10','Customer에 고객번호 1,2만 있다. Orders의 외래키 custid=3 삽입은?',['정상','도메인 순서 위반','참조 무결성 위반','항상 NULL로 변환'],2,'존재하지 않는 고객을 참조한다.'),
+  choice('db-ex-11','다음 질의의 결과는? SELECT COUNT(*) FROM T; T에는 NULL을 포함한 6개 행이 있다.',['0','NULL','6','NULL이 아닌 행 수'],2,'COUNT(*)는 NULL 여부와 무관하게 행을 센다.'),
+  choice('db-ex-12','중복을 제거하고 고객번호를 조회하려면?',['SELECT DISTINCT custid FROM Orders','SELECT UNIQUE * 반드시 사용','GROUP ALL custid','SELECT NULL custid'],0,'DISTINCT는 조회 결과의 중복 행을 제거한다.'),
+  choice('db-ex-13','WHERE와 HAVING의 차이는?',['둘 다 그룹 생성 뒤만 적용','WHERE는 개별 행, HAVING은 그룹 조건','HAVING은 정렬 전용','WHERE는 집계값만 사용'],1,'WHERE로 행을 거른 뒤 그룹을 만들고 HAVING으로 집계된 그룹 조건을 적용한다.'),
+  choice('db-ex-14','LEFT JOIN에서 오른쪽 테이블에 대응 행이 없는 왼쪽 행은?',['삭제된다','오른쪽 값이 NULL로 표시된다','왼쪽 값도 모두 NULL','항상 오류'],1,'왼쪽 행을 보존하며 대응하는 오른쪽 값은 NULL이다.'),
+  choice('db-ex-15','단일 값 비교 price > (부속질의)에서 부속질의가 여러 행을 반환하면?',['항상 첫 값 사용','단일 값 비교 조건에 맞지 않는다','자동 SUM','항상 모든 행 반환'],1,'단일 값 비교에는 스칼라 결과가 필요하다. 다중 행이면 IN, ANY, ALL 등 목적에 맞는 연산이 필요하다.'),
+  blank('db-ex-16','DB 정의: 여러 사용자가 공유하도록 ___해서 저장한 운영 데이터의 집합.','통합',['통합'],'정의의 핵심 단어는 통합·저장·공유·운영이다.'),
+  blank('db-ex-17','스키마·제약조건 등 데이터에 대한 데이터를 ___라고 한다.','메타데이터',['메타데이터','metadata'],'데이터 사전은 메타데이터를 관리한다.'),
+  blank('db-ex-18','속성이 가질 수 있는 값의 집합을 ___이라고 한다.','도메인',['도메인','domain'],'자료형과 허용 범위 등을 통해 값의 범위를 규정한다.'),
+  blank('db-ex-19','유일성과 최소성을 모두 만족하는 키는 ___이다.','후보키',['후보키','candidate key'],'슈퍼키 중 불필요한 속성이 없는 최소 집합이다.'),
+  blank('db-ex-20','기본키로 선택되지 않은 후보키는 ___이다.','대체키',['대체키','alternate key'],'후보키 중 하나를 기본키로 고르고 나머지는 대체키가 된다.'),
+  blank('db-ex-21','다른 릴레이션의 키를 참조하는 속성 집합은 ___이다.','외래키',['외래키','foreign key'],'릴레이션 사이의 연결을 표현한다.'),
+  blank('db-ex-22','내부 스키마를 바꿔도 개념 스키마가 유지되는 것은 ___ 데이터 독립성이다.','물리적',['물리적'],'물리 저장 구조 변경의 영향을 상위 논리 구조로부터 분리한다.'),
+  blank('db-ex-23','조건의 빈칸을 채워라. NULL인 연락처를 찾는다.','IS',['IS'],'NULL 판정은 = NULL 대신 IS NULL을 사용한다.','SELECT * FROM Student\nWHERE phone ___ NULL;'),
+  blank('db-ex-24','가격 내림차순 정렬의 빈칸을 채워라.','DESC',['DESC'],'ASC는 오름차순, DESC는 내림차순이다.','SELECT * FROM Book\nORDER BY price ___;'),
+  blank('db-ex-25','고객별 주문 수를 세는 구문의 빈칸을 채워라.','GROUP BY',['GROUP BY'],'custid별로 행을 묶어 집계한다.','SELECT custid, COUNT(*)\nFROM Orders\n___ custid;'),
+  blank('db-ex-26','주문이 2건 이상인 고객 그룹만 남기는 빈칸을 채워라.','HAVING',['HAVING'],'집계 후 그룹 조건은 HAVING이다.','SELECT custid, COUNT(*)\nFROM Orders\nGROUP BY custid\n___ COUNT(*) >= 2;'),
+  blank('db-ex-27','고객별 주문을 연결하는 JOIN 조건의 빈칸을 채워라.','ON',['ON'],'ON에 두 테이블을 연결하는 조건을 작성한다.','SELECT c.name, o.orderid\nFROM Customer c JOIN Orders o\n___ c.custid = o.custid;'),
+  blank('db-ex-28','도서명이 파이썬으로 시작하는 책을 조회한다. 빈칸에 연산자를 쓰라.','LIKE',['LIKE'],'%는 길이 0 이상의 문자열에 대응한다.','SELECT * FROM Book\nWHERE bookname ___ \'파이썬%\';'),
+  blank('db-ex-29','도서 평균 가격보다 비싼 책을 조회한다. 함수 이름을 채워라.','AVG',['AVG'],'부속질의에서 평균 가격 하나를 구해 각 책 가격과 비교한다.','SELECT * FROM Book\nWHERE price > (SELECT ___(price) FROM Book);'),
+  blank('db-ex-30','이론적인 릴레이션의 한 행을 가리키는 용어는 ___이다.','투플',['투플','튜플','tuple'],'속성은 열, 투플은 행을 의미한다.'),
+]

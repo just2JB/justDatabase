@@ -69,8 +69,9 @@ while True:
             return index
     return -1
 
-print(sequential_search([2, 5, 8, 12], 8))
-print(sequential_search([2, 5, 8, 12], 7))`,
+data = [34, 12, 78, 5, 63, 27, 91, 18, 56, 42, 7, 85]
+for key in [34, 42, 85, 100]:
+    print(sequential_search(data, key))`,
   unique: `def unique_elem(A):
     for i in range(len(A) - 1):
         for j in range(i + 1, len(A)):

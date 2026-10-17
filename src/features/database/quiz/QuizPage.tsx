@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
+import PracticeTabs from '../../../shared/components/PracticeTabs'
+import ChoiceOptions from '../../../shared/components/ChoiceOptions'
+import { pushLocation, scrollToTarget } from '../../../shared/navigation'
 import { emptyProgress, isQuizProgress, useSavedProgress } from './quizStorage'
 import type { SearchEntry } from '../data/content'
 import { practiceQuestions, quizQuestions, topicNames } from './quizContent'
 import type { PracticeQuestion, QuizQuestion, QuizTopic } from './quizContent'
+import ExamSession from '../../../shared/components/ExamSession'
+import { databaseExam, databaseExamKinds } from './databaseExam'
 import SqlRunner from '../sql/components/SqlRunner'
 import SqlTablesPage from '../sql/pages/SqlTablesPage'
 import QuizFilterBar from '../../../shared/components/QuizFilterBar'
-
-function shuffle<T>(values: T[]) {
-  const result = [...values]
-  for (let index = result.length - 1; index > 0; index--) { const next = Math.floor(Math.random() * (index + 1)); [result[index], result[next]] = [result[next], result[index]] }
-  return result
-}
 
 type PracticeProgress = { index: number; selected: number[]; submitted: boolean; results: Record<string, boolean> }
 function isPracticeProgress(value: unknown): value is PracticeProgress {
@@ -34,44 +33,47 @@ function RelationPractice() {
     {!submitted ? <button type="button" className="quiz-primary" disabled={!selected.length} onClick={() => { setProgress(previous => ({ ...previous, submitted: true, results: { ...previous.results, [question.id]: correct } })) }}>선택한 답 확인</button> : <div className={`quiz-feedback ${correct ? 'correct' : 'incorrect'}`} role="status"><strong>{correct ? '정답입니다.' : '조건을 다시 살펴보세요.'}</strong><p>{question.explanation}</p><p>정답: {question.correct.map(value => question.mode === 'columns' ? question.columns[value] : `${value + 1}번째 투플`).join(', ')}</p><div className="quiz-actions"><button type="button" className="visual-button" onClick={() => { setProgress(previous => ({ ...previous, selected: [], submitted: false })) }}>다시 풀기</button>{index < practiceQuestions.length - 1 ? <button type="button" className="quiz-primary" onClick={() => changeQuestion(index + 1)}>다음 문제</button> : null}</div></div>}</div></section>
 }
 
+type QuizView = 'setup' | 'practice' | 'sql' | 'tables' | 'exam'
+function currentView(): QuizView {
+  const value = new URLSearchParams(location.search).get('view')
+  return value === 'exam' || value === 'practice' || value === 'sql' || value === 'tables' ? value : 'setup'
+}
 export default function QuizPage({ onLearn }: { onLearn: (entry: SearchEntry) => void }) {
   const [progress, setProgress, failed] = useSavedProgress('concept', emptyProgress, isQuizProgress)
-  const { topic, type, random, index, answers, finished } = progress
-  const session = progress.ids.map(id => quizQuestions.find(question => question.id === id)!)
-  const selection = session[index] && answers[session[index].id] !== undefined ? answers[session[index].id] : progress.selection
-  const [view, setView] = useState<'setup' | 'solve' | 'practice' | 'sql' | 'tables'>(() => { const value = new URLSearchParams(location.search).get('view'); return value === 'solve' || value === 'practice' || value === 'sql' || value === 'tables' ? value : 'setup' })
+  const [view, setView] = useState<QuizView>(currentView)
+  const { topic, type, answers } = progress
+  const items = quizQuestions.filter(question => (topic === 'all' || topic === question.topic) && (type === 'all' || type === question.type))
+  const completed = items.filter(question => answers[question.id] !== undefined)
+  const correct = completed.filter(question => answers[question.id] === question.answer).length
   useEffect(() => {
-    function readView() { const value = new URLSearchParams(location.search).get('view'); setView(value === 'solve' || value === 'practice' || value === 'sql' || value === 'tables' ? value : 'setup') }
+    const readView = () => setView(currentView())
     window.addEventListener('popstate', readView)
     return () => window.removeEventListener('popstate', readView)
   }, [])
-  function navigate(next: 'setup' | 'solve' | 'practice' | 'sql' | 'tables') {
+  function navigate(next: QuizView) {
     const url = new URL(location.href)
     url.searchParams.set('page', 'quiz')
     if (next === 'setup') url.searchParams.delete('view')
     else url.searchParams.set('view', next)
     url.hash = ''
-    window.history.pushState(null, '', url)
+    pushLocation(url)
     setView(next)
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    scrollToTarget('practice-tabs')
   }
-  const setTopic = (value: QuizTopic | 'all') => setProgress(previous => ({ ...previous, topic: value }))
-  const setType = (value: 'all' | 'choice' | 'ox') => setProgress(previous => ({ ...previous, type: value }))
-  const setRandom = (value: boolean) => setProgress(previous => ({ ...previous, random: value }))
-  const setSelection = (value: number | null) => setProgress(previous => ({ ...previous, selection: value }))
-  const available = quizQuestions.filter(question => (topic === 'all' || question.topic === topic) && (type === 'all' || question.type === type))
-  const question: QuizQuestion | undefined = session.at(index)
-  const submitted = question ? answers[question.id] !== undefined : false
-  const wrong = session.filter(item => answers[item.id] !== undefined && answers[item.id] !== item.answer)
-  const score = session.filter(item => answers[item.id] === item.answer).length
-  function start(items: QuizQuestion[]) {
-    if (!items.length) return
-    setProgress(previous => ({ ...previous, ids: (random ? shuffle(items) : items).map(item => item.id), index: 0, selection: null, answers: {}, finished: false }))
-    navigate('solve')
+  function answer(id: string, choice: number) {
+    setProgress(previous => ({...previous, ids:quizQuestions.map(q=>q.id), index:0, selection:null, finished:false, answers:{...previous.answers,[id]:choice}}))
   }
   function learn(item: QuizQuestion) { onLearn({ title: '', text: '', page: item.topic, section: item.target, target: item.target, ...(item.topic === 'dbs' && ['dbs-languages', 'dml-comparison'].includes(item.target) ? { language: item.target === 'dml-comparison' ? 1 : 0 } : {}) }) }
-  if (view === 'setup') return <><div className="page-heading"><h1>문제 풀기</h1><p>객관식·OX, 릴레이션 구성, SQL 직접 실행으로 수업 내용을 확인해 보세요.</p></div><p className="quiz-save-status" role="status">{failed ? '저장을 사용할 수 없습니다. 현재 화면에서만 풀이가 유지됩니다.' : '로컬 저장 · 새로고침하거나 다른 개념을 보고 돌아와도 이어 풀 수 있습니다.'}</p><section id="concept-quiz"><div className="quiz-setup"><h2>개념 문제 <small>객관식 16개 · OX 16개</small></h2><QuizFilterBar topic={topic} type={type} topics={[{ value: 'all' as const, label: '전체' }, ...Object.entries(topicNames).map(([value, label]) => ({ value: value as QuizTopic, label }))]} types={[{ value: 'all' as const, label: '전체' }, { value: 'choice' as const, label: '객관식' }, { value: 'ox' as const, label: 'OX' }]} onTopicChange={setTopic} onTypeChange={setType} count={available.length} /><div className="quiz-filter-actions"><label className="quiz-shuffle"><input type="checkbox" checked={random} onChange={event => setRandom(event.target.checked)} />문제 순서 섞기</label><button type="button" className="quiz-primary" disabled={!available.length} onClick={() => start(available)}>{session.length ? '새로 시작' : '시작하기'} · {available.length}문제</button></div><p className="dbs-mini">학습용으로 만든 문제입니다. 시작하면 풀이 전용 페이지로 이동합니다.</p>{session.length ? <div className="quiz-resume"><p>{finished ? '저장된 풀이 결과' : '저장된 풀이'} · {Object.keys(answers).length} / {session.length}문제 제출</p><button type="button" className="visual-button" onClick={() => navigate('solve')}>{finished ? '결과 다시 보기' : '이어서 풀기'}</button></div> : null}</div></section><div className="practice-entry-grid"><section className="practice-entry" id="relation-practice"><span className="practice-entry-label">관계 데이터 모델</span><h2>릴레이션 직접 만들기</h2><p>후보키·복합키 열 선택, 참조·개체 무결성, 원자성까지 직접 구성하는 6문제입니다.</p><button type="button" className="quiz-primary" onClick={() => navigate('practice')}>실습 페이지 열기</button></section><section className="practice-entry" id="sql-practice-entry"><span className="practice-entry-label">SQL 실습</span><h2>SQL 직접 풀기</h2><p>JOIN 문제 14개와 부속질의 문제 4개를 직접 작성하고 실행 결과를 확인합니다.</p><div className="practice-entry-actions"><button type="button" className="quiz-primary" onClick={() => navigate('sql')}>SQL 문제 열기</button><button type="button" className="visual-button" onClick={() => navigate('tables')}>원본 테이블 보기</button></div></section></div></>
-  return <><button type="button" className="quiz-back-link" onClick={() => navigate(view === 'tables' ? 'sql' : 'setup')}>{view === 'tables' ? 'SQL 문제로 돌아가기' : '문제 선택으로 돌아가기'}</button><div className="page-heading"><h1>{view === 'solve' ? '개념 문제 풀기' : view === 'practice' ? '릴레이션 실습' : view === 'sql' ? 'SQL 문제 풀기' : view === 'tables' ? '마당서점 테이블' : '문제 풀기'}</h1><p>{view === 'sql' ? '마당서점 데이터에 SQL을 직접 실행하고 결과를 확인합니다.' : view === 'tables' ? 'SQL 문제에 사용하는 세 테이블의 구조와 원본 데이터를 확인합니다.' : '선택한 답과 진행도를 이 브라우저에 자동 저장합니다.'}</p></div>{view !== 'sql' && view !== 'tables' ? <p className="quiz-save-status" role="status">{failed ? '저장을 사용할 수 없습니다. 현재 화면에서만 풀이가 유지됩니다.' : '로컬 저장 · 새로고침하거나 다른 개념을 보고 돌아와도 이어 풀 수 있습니다.'}</p> : null}<section id="concept-quiz">
-    {view === 'solve' && question && !finished ? <div key={question?.id} className="quiz-question-panel content-enter"><div className="quiz-progress"><span>{index + 1} / {session.length}</span><progress value={index + (submitted ? 1 : 0)} max={session.length} aria-label="문제 풀이 진행도" /><span>정답 {score}개</span></div><span className="quiz-meta">{topicNames[question.topic]} · {question.type === 'choice' ? '객관식 · 하나 선택' : 'OX'}</span><h3>{question.prompt}</h3><fieldset className={`quiz-options ${question.type === 'ox' ? 'ox-options' : ''}`}><legend className="sr-only">정답 선택</legend>{question.options.map((option, optionIndex) => <label key={optionIndex} className={`${selection === optionIndex ? 'selected' : ''} ${submitted && optionIndex === question.answer ? 'answer-correct' : ''} ${submitted && selection === optionIndex && selection !== question.answer ? 'answer-wrong' : ''}`}><input type="radio" name={`question-${question.id}`} disabled={submitted} checked={selection === optionIndex} onChange={() => setSelection(optionIndex)} /><span>{question.type === 'choice' ? `${optionIndex + 1}. ` : ''}{option}</span></label>)}</fieldset>{submitted ? <div className={`quiz-feedback ${answers[question.id] === question.answer ? 'correct' : 'incorrect'}`} role="status"><strong>{answers[question.id] === question.answer ? '정답입니다.' : '아쉽지만 오답입니다.'}</strong><p>정답: {question.options[question.answer]}</p><p>{question.explanation}</p><button type="button" className="quiz-learn-link" onClick={() => learn(question)}>관련 개념 보기</button></div> : null}<div className="quiz-actions">{!submitted ? <button type="button" className="quiz-primary" disabled={selection === null} onClick={() => { if (selection !== null) setProgress(previous => ({ ...previous, answers: { ...previous.answers, [question.id]: selection } })) }}>정답 확인</button> : <button type="button" className="quiz-primary" onClick={() => { if (index === session.length - 1) setProgress(previous => ({ ...previous, finished: true })); else setProgress(previous => ({ ...previous, index: previous.index + 1, selection: null })) }}>{index === session.length - 1 ? '결과 보기' : '다음 문제'}</button>}</div></div> : null}
-    {view === 'solve' && finished ? <div className="quiz-result"><h3>{session.length}문제 중 {score}문제 정답</h3><p>정답률 {Math.round(score / session.length * 100)}%</p><div className="quiz-actions"><button type="button" className="quiz-primary" disabled={!wrong.length} onClick={() => start(wrong)}>틀린 {wrong.length}문제 다시 풀기</button><button type="button" className="visual-button" onClick={() => start(available)}>전체 다시 풀기</button></div><ul className="quiz-review">{session.map(item => <li key={item.id}><span className={answers[item.id] === item.answer ? 'valid-text' : 'invalid-text'}>{answers[item.id] === item.answer ? '정답' : '오답'}</span><div><strong>{item.prompt}</strong><p>내 답: {item.options[answers[item.id]]} · 정답: {item.options[item.answer]}</p><p>{item.explanation}</p><button type="button" className="quiz-learn-link" onClick={() => learn(item)}>관련 개념 보기</button></div></li>)}</ul></div> : null}{view === 'solve' && !question ? <div key="empty-quiz" className="quiz-question-panel content-enter"><h3>저장된 문제가 없습니다.</h3><button type="button" className="quiz-primary" onClick={() => navigate('setup')}>문제 선택하기</button></div> : null}</section>{view === 'practice' ? <RelationPractice /> : view === 'sql' ? <section id="sql-practice"><SqlRunner onOpenTables={() => navigate('tables')} /></section> : view === 'tables' ? <SqlTablesPage /> : null}</>
+  return <>
+    <div className="page-heading"><h1>데이터베이스 문제 풀기</h1><p>개념 문제와 릴레이션·SQL 실습을 한 페이지에서 선택해 학습하세요.</p></div>
+    <PracticeTabs value={view==='tables'?'sql':view} onChange={navigate} tabs={[{id:'exam',title:'시험 대비',description:'객관식·빈칸 · 30문제'},{id:'setup',title:'개념 문제 풀이',description:'데이터베이스 개념과 관계 모델 확인'},{id:'practice',title:'릴레이션 실습',description:'키·무결성·릴레이션 구성'},{id:'sql',title:'SQL 실습',description:'질의 작성·실행·원본 테이블'}]}/>
+    {view==='setup' ? <section id="concept-quiz" className="content-enter" role="tabpanel">
+      <QuizFilterBar topic={topic} type={type} topics={[{value:'all' as const,label:'전체'},...Object.entries(topicNames).map(([value,label])=>({value:value as QuizTopic,label}))]} types={[{value:'all' as const,label:'전체'},{value:'choice' as const,label:'객관식'},{value:'ox' as const,label:'OX'}]} onTopicChange={value=>setProgress(p=>({...p,topic:value}))} onTypeChange={value=>setProgress(p=>({...p,type:value}))} count={items.length}/>
+      <p role="status">진행 {completed.length} / {items.length} · 정답 {correct}개</p><progress max={items.length || 1} value={completed.length} aria-label="풀이 진행도"/>
+      <p className="algo-source-note" role="status">{failed?'저장 공간을 사용할 수 없어 현재 화면에서만 답안이 유지됩니다.':'선택한 조건과 답안은 이 브라우저에 자동 저장됩니다.'}</p>
+      <div className="exam-questions">{items.map((question,i)=><article className="exam-question" key={question.id}><span className="course-tag">{question.type==='ox'?'OX':'객관식'} · {topicNames[question.topic]}</span><h3>{i+1}. {question.prompt}</h3><ChoiceOptions options={question.options} value={answers[question.id]} onChange={index=>answer(question.id,index)}/>{answers[question.id]!==undefined ? <div className="exam-feedback" role="status"><strong>{answers[question.id]===question.answer?'정답':'다시 확인해 보세요'}</strong><p>정답: {question.options[question.answer]}</p><p>{question.explanation}</p><button className="quiz-learn-link" onClick={()=>learn(question)}>관련 개념 보기</button></div>:null}</article>)}</div>
+      {!items.length?<p>이 조건에 해당하는 문제가 없습니다.</p>:null}
+      <button className="algo-practice-link" onClick={()=>setProgress(previous=>({...previous,finished:false,selection:null,answers:Object.fromEntries(Object.entries(previous.answers).filter(([id])=>!items.some(q=>q.id===id)))}))}>현재 목록 답안 초기화</button>
+    </section> : <div role="tabpanel" className="content-enter">{view==='exam'?<ExamSession questions={databaseExam} kinds={databaseExamKinds} storageKey="justStudy.database.examPractice.v1"/>:view==='practice'?<RelationPractice/>:view==='tables'?<><button className="quiz-back-link" onClick={()=>navigate('sql')}>SQL 실습으로 돌아가기</button><SqlTablesPage/></>:<section id="sql-practice"><SqlRunner onOpenTables={()=>navigate('tables')}/></section>}</div>}
+  </>
 }

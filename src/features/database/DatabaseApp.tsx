@@ -7,6 +7,7 @@ import Search from './components/Search'
 import Sidebar from './components/Sidebar'
 import DbmsPage from './pages/DbmsPage'
 import DbsPage from './pages/DbsPage'
+import DataLanguagePage from './language/DataLanguagePage'
 import RelationPage from './pages/RelationPage'
 import QuizPage from './quiz/QuizPage'
 import SqlBasicsPage from './sql/pages/SqlBasicsPage'
@@ -17,7 +18,7 @@ import { BigDataVisual, DatabaseVisual, MeaningVisual, ShapeVisual } from './com
 
 function readPage():PageId {
   const value=new URLSearchParams(location.search).get('page')
-  return value==='dbms'||value==='dbs'||value==='relation'||value==='quiz'||value==='sql4'||value==='sql5'||value==='subqueries'||value==='changes'?value:'basics'
+  return value==='dbms'||value==='dbs'||value==='languages'||value==='relation'||value==='quiz'||value==='sql4'||value==='sql5'||value==='subqueries'||value==='changes'?value:'basics'
 }
 function readDestination():SearchEntry {
   const params=new URLSearchParams(location.search)
@@ -31,17 +32,21 @@ export default function DatabaseApp() {
   const [page, setPage] = useState<PageId>(readPage)
   const [destination, setDestination] = useState<SearchEntry>(readDestination)
   const selected = shapes[shape]
-  const pageTitle = page === 'subqueries' ? '부속질의' : page === 'changes' ? '데이터 삽입·수정·삭제' : page === 'sql4' ? 'SQL 기초 · 테이블 정의' : page === 'sql5' ? 'SQL 검색 · 데이터 질의' : page === 'quiz' ? '문제 풀기' : page === 'relation' ? '관계 데이터 모델' : page === 'dbs' ? '데이터베이스 시스템' : page === 'dbms' ? '데이터베이스 관리 시스템' : '데이터베이스, 정보'
+  const pageTitle = page === 'languages' ? 'SQL 문법 사전' : page === 'subqueries' ? '부속질의' : page === 'changes' ? '데이터 삽입·수정·삭제' : page === 'sql4' ? 'SQL 기초 · 테이블 정의' : page === 'sql5' ? 'SQL 검색 · 데이터 질의' : page === 'quiz' ? '문제 풀기' : page === 'relation' ? '관계 데이터 모델' : page === 'dbs' ? '데이터베이스 시스템' : page === 'dbms' ? '데이터베이스 관리 시스템' : '데이터베이스, 정보'
 
   useEffect(() => {
     document.title = `${pageTitle} · justDatabase`
+  }, [pageTitle])
+
+  useEffect(() => {
+    const initialPage = readPage()
     const url = new URL(window.location.href)
     url.searchParams.set('course', 'database')
-    if (page !== 'basics') url.searchParams.set('page', page)
+    if (initialPage !== 'basics') url.searchParams.set('page', initialPage)
     else url.searchParams.delete('page')
-    if (page !== 'quiz') url.searchParams.delete('view')
+    if (initialPage !== 'quiz') url.searchParams.delete('view')
     window.history.replaceState(null, '', url)
-  }, [page, pageTitle])
+  }, [])
 
   useEffect(() => {
     if (!destination) return
@@ -78,7 +83,7 @@ export default function DatabaseApp() {
     <main id="main">
       <header className="topbar"><span>개념 정리 <span className="slash">/</span> {pageTitle}</span><Search onSelect={selectSearchResult} /></header>
       <div className="document page-enter" key={page}>
-        {page === 'subqueries' ? <SqlSubqueriesPage /> : page === 'changes' ? <SqlChangesPage /> : page === 'sql4' ? <SqlBasicsPage /> : page === 'sql5' ? <SqlQueriesPage key={destination?.sqlQuery ?? 1} initialQuery={destination?.sqlQuery ?? 1} /> : page === 'quiz' ? <QuizPage onLearn={selectSearchResult} /> : page === 'relation' ? <RelationPage /> : page === 'dbs' ? <DbsPage key={destination?.language ?? 0} initialLanguage={destination?.language ?? 0} /> : page === 'dbms' ? <DbmsPage key={destination?.model ?? 0} initialModel={destination?.model ?? 0} /> : <>
+        {page === 'languages' ? <DataLanguagePage target={destination.target ?? destination.section} onJump={target => selectSearchResult({title:'',text:'',page:'languages',section:target,target})}/> : page === 'subqueries' ? <SqlSubqueriesPage /> : page === 'changes' ? <SqlChangesPage /> : page === 'sql4' ? <SqlBasicsPage /> : page === 'sql5' ? <SqlQueriesPage key={destination?.sqlQuery ?? 1} initialQuery={destination?.sqlQuery ?? 1} /> : page === 'quiz' ? <QuizPage onLearn={selectSearchResult} /> : page === 'relation' ? <RelationPage /> : page === 'dbs' ? <DbsPage key={destination?.language ?? 0} initialLanguage={destination?.language ?? 0} onOpenLanguageLab={() => selectSearchResult({title:'',text:'',page:'languages',section:'main'})} /> : page === 'dbms' ? <DbmsPage key={destination?.model ?? 0} initialModel={destination?.model ?? 0} /> : <>
         <div className="page-heading"><h1>데이터베이스, 정보</h1><p>관측한 데이터가 의미 있는 정보가 되기까지.</p></div>
         <StudySection id="data" number="01" title="데이터와 정보">
           <div id="data-comparison" className="comparison"><article><div className="round-icon"><Icon /></div><div><h3>데이터 <small>Data</small></h3><p>1차적 자료, 현실세계에서 단순히 관측한 사실이나 값</p></div></article><article><div className="round-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 20V12M12 20V4M18 20V8" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" /></svg></div><div><h3>정보 <small>Information</small></h3><p>관련성과 목적성을 갖춘 데이터</p></div></article></div>

@@ -181,10 +181,10 @@ function selectStatement(sql: string) {
   return statement
 }
 
-export default function SqlRunner({ onOpenTables }: { onOpenTables?: () => void }) {
+export default function SqlRunner({ onOpenTables, initialSql }: { onOpenTables?: () => void; initialSql?: string }) {
   const databaseRef = useRef<Database | null>(null)
   const [exercise, setExercise] = useState(0)
-  const [sql, setSql] = useState(() => starterSql(0))
+  const [sql, setSql] = useState(() => initialSql ?? starterSql(0))
   const [result, setResult] = useState<SqlResult | null>(null)
   const [error, setError] = useState('')
   const [running, setRunning] = useState(false)
@@ -224,7 +224,7 @@ export default function SqlRunner({ onOpenTables }: { onOpenTables?: () => void 
 
   function chooseExercise(index: number) {
     setExercise(index)
-    setSql(starterSql(index))
+    setSql(index === 0 && initialSql ? initialSql : starterSql(index))
     setResult(null)
     setError('')
     setShowAnswer(false)
@@ -236,7 +236,7 @@ export default function SqlRunner({ onOpenTables }: { onOpenTables?: () => void 
       <div><h3>SQL 직접 실행</h3><p>JOIN·부속질의 18문제와 자유 SQL을 마당서점 데이터에 직접 실행합니다.</p></div>
       <div className="sql-runner-tools"><span>브라우저 SQL 엔진</span>{onOpenTables ? <button type="button" onClick={onOpenTables}>원본 테이블 보기</button> : null}</div>
     </div>
-    <label className="sql-runner-label">연습 문제
+    {!initialSql ? <label className="sql-runner-label">연습 문제
       <select value={exercise} onChange={event => chooseExercise(Number(event.target.value))}>
         {exerciseGroups.map(group => <optgroup key={group} label={group}>
           {exercises.map((item, index) => item.group === group
@@ -244,7 +244,7 @@ export default function SqlRunner({ onOpenTables }: { onOpenTables?: () => void 
             : null)}
         </optgroup>)}
       </select>
-    </label>
+    </label> : null}
     <label className="sql-runner-label" htmlFor="sql-runner-input">SQL 입력</label>
     <textarea
       id="sql-runner-input"

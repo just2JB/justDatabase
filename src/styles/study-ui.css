@@ -37,3 +37,10 @@
 }
 @media(prefers-reduced-motion:reduce){.content-enter,.page-enter,.algorithm-study-shell .page-enter,.exam-feedback,.floating-contents.lesson-contents{animation:none}.shared-study-sidebar button,.practice-view-tabs button,.choice-options button,.algo-controls button,.python-actions button,.quiz-primary,.sidebar-quiz-button,.quiz-filter-options button{transition:none}}
 .selection-bars{height:270px;min-height:270px}.selection-bar-column{max-width:42px;min-width:20px;flex:0 1 42px}.brute-example-tabs .algo-concept-grid>article{min-width:0}
+.choice-options button[data-result=incorrect]{background:#fff0f0;border-color:#d94c4c;color:#a32424}.choice-options button[data-result=incorrect] .choice-index{background:#c83c3c;color:#fff}
+.choice-options button[data-result=correct]{background:#edf8f1;border-color:#69a982;color:#246440}.choice-options button[data-result=correct] .choice-index{background:#2d8050;color:#fff}
+.choice-result{flex-shrink:0;margin-left:auto;font-size:11px;white-space:nowrap;line-height:25px}.choice-options button>span:nth-child(2){min-width:0}
+.exam-feedback[data-result=incorrect]{background:#fff0f0;border:1px solid #edb3b3;color:#a32424}.exam-feedback[data-result=correct]{background:#edf8f1;border:1px solid #b5d6c0;color:#246440}
+.exam-short-answer[aria-invalid=true]{border-color:#d94c4c;background:#fff5f5;color:#a32424}
+.exam-questions>.exam-question[data-result=incorrect]{border-color:#df8e8e;background:#fffafa}
+.exam-questions>.exam-question[data-result=correct]{border-color:#a4cdb4;background:#fbfefc}

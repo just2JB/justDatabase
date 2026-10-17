@@ -1,3 +1,4 @@
+import { missionPhases, missions } from '../workbench/missions'
 import { sections } from './content'
 import type { PageId } from './content'
 import { dbmsGroups } from './dbmsContent'
@@ -18,6 +19,7 @@ export const databaseLessons: {id:PageId; title:string}[] = [
   {id:'changes',title:'데이터 삽입·수정·삭제'},
 ]
 export function databaseContents(page:PageId) {
+  if(page==='workbench'||page==='workbench-answers')return missionPhases.map(phase=>({title:phase,target:`workbench-mission-${missions.find(mission=>mission.phase===phase)!.id}`}))
   if(page==='languages')return dictionaryGroups.map(group=>({title:group,target:`sql-ref-${dictionaryEntries.find(entry=>entry.group===group)!.id}`}))
   if(page==='basics')return sections.map(section=>({title:section.title,target:section.id}))
   const groups = page==='dbms'?dbmsGroups:page==='dbs'?dbsGroups:page==='relation'?relationGroups:page==='sql4'?sql4Groups:page==='sql5'?sql5Groups:page==='subqueries'?subqueryGroups:page==='changes'?changeGroups:[]

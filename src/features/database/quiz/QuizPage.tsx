@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import '../workbench/workbench.css'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import PracticeTabs from '../../../shared/components/PracticeTabs'
 import ChoiceOptions from '../../../shared/components/ChoiceOptions'
 import { pushLocation, scrollToTarget } from '../../../shared/navigation'
@@ -6,11 +7,11 @@ import { emptyProgress, isQuizProgress, useSavedProgress } from './quizStorage'
 import type { SearchEntry } from '../data/content'
 import { practiceQuestions, quizQuestions, topicNames } from './quizContent'
 import type { PracticeQuestion, QuizQuestion, QuizTopic } from './quizContent'
-import ExamSession from '../../../shared/components/ExamSession'
-import { databaseExam, databaseExamKinds } from './databaseExam'
 import SqlRunner from '../sql/components/SqlRunner'
 import SqlTablesPage from '../sql/pages/SqlTablesPage'
 import QuizFilterBar from '../../../shared/components/QuizFilterBar'
+
+const DatabaseExamPractice = lazy(() => import('./DatabaseExamPractice'))
 
 type PracticeProgress = { index: number; selected: number[]; submitted: boolean; results: Record<string, boolean> }
 function isPracticeProgress(value: unknown): value is PracticeProgress {
@@ -66,7 +67,7 @@ export default function QuizPage({ onLearn }: { onLearn: (entry: SearchEntry) =>
   function learn(item: QuizQuestion) { onLearn({ title: '', text: '', page: item.topic, section: item.target, target: item.target, ...(item.topic === 'dbs' && ['dbs-languages', 'dml-comparison'].includes(item.target) ? { language: item.target === 'dml-comparison' ? 1 : 0 } : {}) }) }
   return <>
     <div className="page-heading"><h1>데이터베이스 문제 풀기</h1><p>개념 문제와 릴레이션·SQL 실습을 한 페이지에서 선택해 학습하세요.</p></div>
-    <PracticeTabs value={view==='tables'?'sql':view} onChange={navigate} tabs={[{id:'exam',title:'시험 대비',description:'객관식·빈칸 · 30문제'},{id:'setup',title:'개념 문제 풀이',description:'데이터베이스 개념과 관계 모델 확인'},{id:'practice',title:'릴레이션 실습',description:'키·무결성·릴레이션 구성'},{id:'sql',title:'SQL 실습',description:'질의 작성·실행·원본 테이블'}]}/>
+    <PracticeTabs value={view==='tables'?'sql':view} onChange={navigate} tabs={[{id:'exam',title:'시험 대비',description:'전 범위 모의고사 1~3회 · 총 120문제'},{id:'setup',title:'개념 문제 풀이',description:'데이터베이스 개념과 관계 모델 확인'},{id:'practice',title:'릴레이션 실습',description:'키·무결성·릴레이션 구성'},{id:'sql',title:'SQL 실습',description:'질의 작성·실행·원본 테이블'}]}/>
     {view==='setup' ? <section id="concept-quiz" className="content-enter" role="tabpanel">
       <QuizFilterBar topic={topic} type={type} topics={[{value:'all' as const,label:'전체'},...Object.entries(topicNames).map(([value,label])=>({value:value as QuizTopic,label}))]} types={[{value:'all' as const,label:'전체'},{value:'choice' as const,label:'객관식'},{value:'ox' as const,label:'OX'}]} onTopicChange={value=>setProgress(p=>({...p,topic:value}))} onTypeChange={value=>setProgress(p=>({...p,type:value}))} count={items.length}/>
       <p role="status">진행 {completed.length} / {items.length} · 정답 {correct}개</p><progress max={items.length || 1} value={completed.length} aria-label="풀이 진행도"/>
@@ -74,6 +75,6 @@ export default function QuizPage({ onLearn }: { onLearn: (entry: SearchEntry) =>
       <div className="exam-questions">{items.map((question,i)=><article className="exam-question" key={question.id} data-result={answers[question.id]===undefined?undefined:answers[question.id]===question.answer?'correct':'incorrect'}><span className="course-tag">{question.type==='ox'?'OX':'객관식'} · {topicNames[question.topic]}</span><h3>{i+1}. {question.prompt}</h3><ChoiceOptions options={question.options} value={answers[question.id]} correctIndex={question.answer} revealed={answers[question.id]!==undefined} onChange={index=>answer(question.id,index)}/>{answers[question.id]!==undefined ? <div className="exam-feedback" data-result={answers[question.id]===question.answer?'correct':'incorrect'} role="status"><strong>{answers[question.id]===question.answer?'✓ 정답':'✕ 오답'}</strong><p>정답: {question.options[question.answer]}</p><p>{question.explanation}</p><button className="quiz-learn-link" onClick={()=>learn(question)}>관련 개념 보기</button></div>:null}</article>)}</div>
       {!items.length?<p>이 조건에 해당하는 문제가 없습니다.</p>:null}
       <button className="algo-practice-link" onClick={()=>setProgress(previous=>({...previous,finished:false,selection:null,answers:Object.fromEntries(Object.entries(previous.answers).filter(([id])=>!items.some(q=>q.id===id)))}))}>현재 목록 답안 초기화</button>
-    </section> : <div role="tabpanel" className="content-enter">{view==='exam'?<ExamSession questions={databaseExam} kinds={databaseExamKinds} storageKey="justStudy.database.examPractice.v1"/>:view==='practice'?<RelationPractice/>:view==='tables'?<><button className="quiz-back-link" onClick={()=>navigate('sql')}>SQL 실습으로 돌아가기</button><SqlTablesPage/></>:<section id="sql-practice"><SqlRunner onOpenTables={()=>navigate('tables')}/></section>}</div>}
+    </section> : <div role="tabpanel" className="content-enter">{view==='exam'?<Suspense fallback={<p role="status">시험 문제를 불러오는 중…</p>}><DatabaseExamPractice/></Suspense>:view==='practice'?<RelationPractice/>:view==='tables'?<><button className="quiz-back-link" onClick={()=>navigate('sql')}>SQL 실습으로 돌아가기</button><SqlTablesPage/></>:<section id="sql-practice"><div className="wb-entry"><div><strong>Workbench에서 처음부터 만들어 보기</strong><p>공방 예약 DB · 테이블 생성부터 부속질의까지 30개 미션</p></div><button type="button" onClick={()=>onLearn({title:"",text:"",page:"workbench",section:"main"})}>별도 미션 페이지 →</button></div><SqlRunner onOpenTables={()=>navigate('tables')}/></section>}</div>}
   </>
 }

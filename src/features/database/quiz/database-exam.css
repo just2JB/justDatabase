@@ -1,0 +1,8 @@
+.database-exam-picker{display:flex;align-items:center;flex-wrap:wrap;gap:12px 16px;margin:24px 0 16px;padding:16px 18px;background:#f3f5f8;border:1px solid #e5e9ef;border-radius:10px}
+.database-exam-picker>label{font-size:12px;font-weight:650;color:#5c6b80;white-space:nowrap}
+.database-exam-picker>select{min-height:44px;max-width:100%;padding:10px 32px 10px 12px;border:1px solid #cbd5e1;border-radius:7px;color:#253b56;background:white;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.database-exam-picker>select:focus-visible{outline:2px solid #729adb;outline-offset:3px}
+.database-exam-picker>p{flex:1 1 240px;font-size:12px;line-height:1.8;color:#718096;margin:0}
+.database-exam-guide{font-size:12px;line-height:1.9;color:#6b7f98;margin:16px 0 24px}.database-exam-guide strong{display:block;font-size:15px;color:#365c86}.database-exam-guide span{display:block;margin:4px 0}
+.database-exam-table{max-width:100%;min-width:0;margin:16px 0 24px}.database-exam-table .table-wrap{overflow-x:auto;max-width:100%;border:1px solid #d9e3ef;border-radius:10px;padding:0 12px}.database-exam-table table{min-width:100%;margin:0 0 12px}.database-exam-table caption{padding:14px 0 10px;font-size:12px;font-weight:650;color:#4e6b8a}.database-exam-table th{background:#f0f5fb}.database-exam-table td,.database-exam-table th{padding:11px 13px;font-size:13px}
+@media(max-width:760px){.database-exam-picker{display:grid;grid-template-columns:1fr;gap:8px;padding:14px}.database-exam-picker>select{width:100%;min-width:0;font-size:16px}.database-exam-table .table-wrap{padding:0 8px}.database-exam-table td,.database-exam-table th{padding:10px;font-size:12px}.database-exam-table table{min-width:390px}.database-exam-guide{font-size:12px}}

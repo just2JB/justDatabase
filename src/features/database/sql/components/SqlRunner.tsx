@@ -4,6 +4,7 @@ import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import { books, customers, orders } from '../data/sqlLessonData'
 import type { SqlResult } from '../data/sqlLessonData'
 import { SqlTable } from './SqlLessonParts'
+import SchemaWorkbench from './SchemaWorkbench'
 
 type Exercise = {
   group: '자유 연습' | 'JOIN 문제' | '부속질의 문제'
@@ -130,6 +131,22 @@ const starterSql = (index: number) => index === 0
   ? 'select *\nfrom book;'
   : `${exercises[index].comment}\n\nselect `
 
+export default function SqlRunner(props: { onOpenTables?: () => void; initialSql?: string }) {
+  const [mode, setMode] = useState<'schema' | 'query'>('schema')
+  if (props.initialSql !== undefined) return <QueryRunner {...props}/>
+  return <>
+    <div className="sql-workspace-filter">
+      <label htmlFor="sql-workspace-mode">실습 범위</label>
+      <select id="sql-workspace-mode" value={mode} aria-describedby="sql-workspace-description" onChange={event => setMode(event.target.value === 'query' ? 'query' : 'schema')}>
+        <option value="schema">정의어·데이터 변경</option>
+        <option value="query">조회·JOIN·부속질의</option>
+      </select>
+      <p id="sql-workspace-description">{mode === 'schema' ? 'CREATE · ALTER · DROP · INSERT · UPDATE · DELETE' : '마당서점 데이터로 자유 연습 · 18개 문제'}</p>
+    </div>
+    <div className="content-enter" key={mode}>{mode === 'schema' ? <SchemaWorkbench/> : <QueryRunner {...props}/>}</div>
+  </>
+}
+
 function seedDatabase(db: Database) {
   db.run(`
     CREATE TABLE Book (
@@ -181,7 +198,7 @@ function selectStatement(sql: string) {
   return statement
 }
 
-export default function SqlRunner({ onOpenTables, initialSql }: { onOpenTables?: () => void; initialSql?: string }) {
+function QueryRunner({ onOpenTables, initialSql }: { onOpenTables?: () => void; initialSql?: string }) {
   const databaseRef = useRef<Database | null>(null)
   const [exercise, setExercise] = useState(0)
   const [sql, setSql] = useState(() => initialSql ?? starterSql(0))

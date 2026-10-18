@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import ChoiceOptions from './ChoiceOptions'
+import { gradeResponse, recordMistake } from '../quiz/mistakeStorage'
+import type { CourseId } from '../quiz/mistakeStorage'
 export type PracticeQuestion={id:string;kind:string;prompt:string;answer:string;explanation:string;code?:string;options?:string[];correct?:number;accepted?:string[];graph?:string}
 type Response={text:string;choice?:number;submitted:boolean;review?:'correct'|'again'}
 type Progress={kind:string;index:number;responses:Record<string,Response>}
@@ -20,7 +22,7 @@ function read(key:string,questions:PracticeQuestion[],kinds:Record<string,string
   }catch{return fallback}
 }
 const normalize=(text:string)=>text.trim().toLocaleLowerCase().replace(/\s+/g,'')
-export default function ExamSession({questions,kinds,storageKey,renderQuestion}:{questions:PracticeQuestion[];kinds:Record<string,string>;storageKey:string;renderQuestion?:(question:PracticeQuestion)=>ReactNode}) {
+export default function ExamSession({questions,kinds,storageKey,renderQuestion,reviewCourse}:{questions:PracticeQuestion[];kinds:Record<string,string>;storageKey:string;reviewCourse?:CourseId;renderQuestion?:(question:PracticeQuestion)=>ReactNode}) {
   const [progress,setProgress]=useState(()=>read(storageKey,questions,kinds))
   const [failed,setFailed]=useState(false)
   const items=questions.filter(q=>progress.kind==='all'||q.kind===progress.kind)
@@ -28,7 +30,7 @@ export default function ExamSession({questions,kinds,storageKey,renderQuestion}:
   const response=progress.responses[question?.id]??{text:'',submitted:false}
   const completed=items.filter(q=>progress.responses[q.id]?.submitted).length
   useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify(progress));setFailed(false)}catch{setFailed(true)}},[progress,storageKey])
-  function update(change:Partial<Response>){if(!question)return;setProgress(p=>({...p,responses:{...p.responses,[question.id]:{...(p.responses[question.id]??{text:'',submitted:false}),...change}}}))}
+  function update(change:Partial<Response>){if(!question)return;if(reviewCourse&&(change.submitted===true||change.review!==undefined)){const next={...response,...change};recordMistake(storageKey,reviewCourse,question.id,next,gradeResponse(question,next))}setProgress(p=>({...p,responses:{...p.responses,[question.id]:{...(p.responses[question.id]??{text:'',submitted:false}),...change}}}))}
   function move(next:number){setProgress(p=>({...p,index:next}));requestAnimationFrame(()=>document.getElementById('exam-current-question')?.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'}))}
   const auto=question?.options!==undefined||question?.accepted!==undefined
   const correct=question?.options?response.choice===question.correct:question?.accepted?.some(answer=>normalize(answer)===normalize(response.text))

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { progressChangeEvent } from '../../../shared/quiz/mistakeStorage'
 import { quizQuestions } from './quizContent'
 import type { QuizTopic } from './quizContent'
 
@@ -14,6 +15,14 @@ export function useSavedProgress<T>(key: string, initial: T, validate: (value: u
   useEffect(() => {
     try { localStorage.setItem(progressPrefix + key, JSON.stringify(state)); setFailed(false) } catch { setFailed(true) }
   }, [key, state])
+  useEffect(() => {
+    const restore = (event: Event) => {
+      if ((event as CustomEvent<{ key: string }>).detail?.key !== progressPrefix + key) return
+      try { const value: unknown = JSON.parse(localStorage.getItem(progressPrefix + key) ?? 'null'); if (validate(value)) setState(value) } catch { /* Keep current progress if a saved record is unreadable. */ }
+    }
+    window.addEventListener(progressChangeEvent, restore)
+    return () => window.removeEventListener(progressChangeEvent, restore)
+  }, [key, validate])
   return [state, setState, failed]
 }
 

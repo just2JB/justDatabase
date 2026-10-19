@@ -1,0 +1,11 @@
+.sql-selection-panel.sql-selection-bubble{position:fixed;z-index:150;width:390px;max-width:calc(100vw - 24px);margin:0;padding:0;overflow:visible;border:1px solid #a9c8ee;border-radius:11px;background:#f4f8ff;box-shadow:0 10px 35px #142e5433;box-sizing:border-box;color:#35577d;font-family:inherit;text-align:left;line-height:1.7}
+.sql-selection-bubble::after{content:'';position:absolute;left:var(--sql-arrow-left);width:12px;height:12px;background:#f4f8ff;transform:translateX(-50%) rotate(45deg);pointer-events:none}
+.sql-selection-bubble[data-side=above]::after{bottom:-7px;border-right:1px solid #a9c8ee;border-bottom:1px solid #a9c8ee}
+.sql-selection-bubble[data-side=below]::after{top:-7px;border-left:1px solid #a9c8ee;border-top:1px solid #a9c8ee}
+.sql-bubble-content{padding:16px;max-height:inherit;overflow:auto;overscroll-behavior:contain;border-radius:inherit;box-sizing:border-box}
+.sql-bubble-content>header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.sql-bubble-content>header strong{font-size:12px;color:#315d93}
+.sql-bubble-content>header button{font:inherit;font-size:11px;background:#fff;color:#607d9f;border:1px solid #c8daed;border-radius:5px;cursor:pointer;padding:4px 8px;white-space:nowrap}
+.sql-bubble-content>header button:focus-visible{outline:2px solid #0757ff;outline-offset:3px}
+.sql-bubble-content article:first-of-type{margin-top:10px;padding-top:10px}
+@media(max-width:760px){.sql-bubble-content{padding:13px}.sql-selection-panel.sql-selection-bubble{width:340px}}

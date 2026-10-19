@@ -14,6 +14,8 @@ import CreateTablePractice, { createExercises } from './CreateTablePractice'
 import SubqueryWalkthrough from './SubqueryWalkthrough'
 import { subqueryLessons } from '../data/subqueryLessons'
 import { workshopSubqueryLessons } from '../data/workshopSubqueryLessons'
+import { SqlHelpCode } from './SqlSelectionHelp'
+import SqlEditor from './SqlEditor'
 
 type Exercise = {
   group: string
@@ -337,7 +339,7 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
     {initialSql === undefined ? <div className="sql-question-overview"><div className="sql-question-meta"><span>{activeExercises[exercise].group}</span><span aria-live="polite">{exercise === 0 ? '자유 연습' : `${String(exercise).padStart(2, '0')} / ${activeExercises.length - 1}`}</span></div><h4>{activeExercises[exercise].label}</h4><p>{activeExercises[exercise].comment?.replace(/^--\s*/gm, '') ?? '원본 테이블을 참고해 원하는 조회문을 작성해 보세요.'}</p><div className="sql-question-pagination" aria-label="문제 이동"><button type="button" disabled={running || exercise <= 1} onClick={() => chooseExercise(exercise - 1)}>← 이전 문제</button><span>이동해도 작성한 SQL은 유지됩니다.</span><button type="button" disabled={running || exercise >= activeExercises.length - 1} onClick={() => chooseExercise(exercise + 1)}>{exercise === 0 ? '첫 문제 풀기' : '다음 문제 →'}</button></div></div> : null}
     <div className="sql-editor-result-layout"><div className="sql-editor-pane">
     <label className="sql-runner-label" htmlFor={`sql-runner-input-${dataset}`}>SQL 입력</label>
-    <textarea
+    <SqlEditor
       id={`sql-runner-input-${dataset}`}
       className="sql-runner-input"
       value={sql}
@@ -362,7 +364,7 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
         }
       }}
     />
-    <p className="sql-keyboard-help" id={`sql-keyboard-help-${dataset}`}>Tab: 두 칸 들여쓰기 · Shift+Tab: 들여쓰기 해제 · Esc 후 Tab: 입력창 밖으로 이동</p>
+    <p className="sql-keyboard-help" id={`sql-keyboard-help-${dataset}`}>구문 더블클릭 또는 Alt+Enter: 설명 → 문법 · Tab: 들여쓰기 · Shift+Tab: 해제 · Esc 후 Tab: 입력창 나가기</p>
     <div className="sql-runner-actions">
       <button type="button" className="quiz-primary" disabled={running} onClick={() => void runSql()}>{running ? '실행 중…' : 'SQL 실행'}</button>
       <button type="button" className="visual-button" disabled={running} onClick={() => { delete drafts.current[exercise]; setSql(initialSql ?? starterSql(activeExercises[exercise])); setResult(null); setTrace(null); setError(''); setShowHint(false); setShowAnswer(false); setAnswerConfirmOpen(false) }}>입력 초기화</button>
@@ -378,7 +380,7 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
       : <p className="sql-runner-empty">SQL을 작성하고 실행하면 여기에 결과가 표시됩니다.</p>}
     </section></div>
     {exercise > 0 && showHint ? <div className="sql-after-run-guide" role="note"><div className="sql-exercise-guide"><div><strong>풀이 방향</strong><p>{activeExercises[exercise].explanation}</p></div></div><div className="sql-exercise-caution"><strong>주의할 점</strong><p>{activeExercises[exercise].caution}</p></div></div> : null}
-    {exercise > 0 && showAnswer ? <div className="sql-model-answer"><div className="content-enter"><strong>모범답안</strong><pre><code>{activeAnswers[exercise]}</code></pre><p>표현 방식은 여러 가지가 있을 수 있습니다. 실행 결과와 조인 조건이 같다면 다른 SQL도 정답이 될 수 있습니다.</p></div></div> : null}
+    {exercise > 0 && showAnswer ? <div className="sql-model-answer"><div className="content-enter"><strong>모범답안</strong><p>색이 있는 구문을 더블클릭하면 설명과 문법을 확인할 수 있습니다.</p><SqlHelpCode sql={activeAnswers[exercise]}/><p>표현 방식은 여러 가지가 있을 수 있습니다. 실행 결과와 조인 조건이 같다면 다른 SQL도 정답이 될 수 있습니다.</p></div></div> : null}
     <p className="visual-caption">조회 전용 SQLite 실습입니다. MySQL 전용 함수와 엄격한 GROUP BY 동작은 실제 MySQL과 다를 수 있습니다.</p>
     <section id={`sql-source-tables-${dataset}`} className="sql-tables-page sql-practice-sources"><h3>원본 테이블 · {dataset === 'madang' ? '마당서점' : '공방 예약'}</h3><p className="visual-caption">{dataset === 'madang' ? 'Customer.custid ↔ Orders.custid · Orders.bookid ↔ Book.bookid / price: 정가, saleprice: 판매가격' : 'Learner.learner_id ↔ Booking.learner_id · Booking.workshop_id ↔ Workshop.workshop_id / fee: 정가, paid_fee: 결제액'}</p><SqlSourceTrace key={traceVersion} sources={sourceTables} trace={trace}/></section>
     {answerConfirmOpen ? <div className="sql-answer-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setAnswerConfirmOpen(false) }}><div className="sql-answer-modal" role="dialog" aria-modal="true" aria-labelledby="sql-answer-modal-title"><span>답안을 보기 전에</span><h4 id="sql-answer-modal-title">모범답안을 확인할까요?</h4><p>답안을 보면 SQL을 스스로 완성하는 연습 효과가 줄어들 수 있습니다. 직접 풀어보고 싶다면 취소한 뒤 먼저 작성해 보세요.</p><div><button type="button" className="visual-button" onClick={() => setAnswerConfirmOpen(false)}>계속 풀기</button><button type="button" className="quiz-primary" autoFocus onClick={() => { setShowAnswer(true); setAnswerConfirmOpen(false) }}>답안 확인하기</button></div></div></div> : null}

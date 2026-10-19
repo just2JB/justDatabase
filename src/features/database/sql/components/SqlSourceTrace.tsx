@@ -97,7 +97,19 @@ export default function SqlSourceTrace({ sources, trace }: { sources: Source[]; 
   const inner = trace?.subqueries?.[innerIndex]
   return <div className="sql-source-trace">
     {trace ? <div className="sql-trace-summary"><strong>실행한 SQL의 원본 연결</strong><pre>{trace.sql}</pre>{trace.note ? <p>{trace.note}</p> : null}{trace.refs.length ? <><p>파란 행: 조건에 참여한 원본 행 · 초록 열: SELECT에서 사용한 속성. 실행 후 입력을 수정해도 이 표시는 마지막 실행 기준입니다.</p><p>{trace.grouped ? '집계 전 원본 행을 표시합니다. GROUP BY·HAVING·DISTINCT 결과의 각 행과 일대일 대응하지 않습니다.' : '연결 묶음을 선택하면 함께 연결된 원본 행만 강조합니다.'} {trace.limited ? '연결은 처음 500개까지만 표시합니다.' : ''}</p><div className="sql-trace-links"><button type="button" aria-pressed={chosen === null} onClick={() => setChosen(null)}>참여 행 전체</button>{trace.links.map((link, index) => <button type="button" key={index} aria-pressed={chosen === index} onClick={() => setChosen(index)}>연결 {index + 1}: {link.map((key, i) => `${trace.refs[i].alias} #${key ?? 'NULL'}`).join(' ↔ ')}</button>)}</div>{!trace.links.length ? <p>조건에 참여한 원본 행이 없습니다.</p> : null}</> : null}</div> : <p className="visual-caption">SQL을 실행하면 연결된 원본 행과 SELECT에 사용한 열을 여기에 표시합니다.</p>}
-    {trace?.subqueries?.length ? <section className="sql-inner-trace" aria-label="부속질의가 선택한 원본 행"><strong>부속질의 안쪽 결과 따라가기</strong><p>파란색은 바깥 질의, 보라색은 선택한 부속질의 조건에 참여한 원본 행입니다. 둘 다 참여하면 두 색과 ‘바깥·안쪽’ 표시가 함께 나옵니다.</p><div className="sql-option-buttons" role="group" aria-label="안쪽 부속질의 선택">{trace.subqueries.map((_, index) => <button key={index} type="button" aria-pressed={innerIndex === index} onClick={() => setInnerIndex(index)}>안쪽 단계 {index + 1}</button>)}</div>{inner ? <><pre className="sql-code">{inner.trace.sql}</pre>{inner.note ? <p>{inner.note}</p> : null}{inner.trace.note ? <p>{inner.trace.note}</p> : null}{inner.trace.grouped ? <p>집계 함수는 보라색 행들로 값을 계산합니다. 보라색은 집계 전 참여 행이며 최종 SELECT 결과와 다를 수 있습니다.</p> : null}{inner.result ? <SqlTable data={inner.result} caption="부속질의가 바깥 조건에 넘기는 값"/> : null}</> : null}<p>단계는 이해를 돕기 위해 안쪽부터 나열했습니다. 실제 DBMS의 물리적 실행 순서를 뜻하지 않습니다.</p></section> : null}
+    {trace?.subqueries?.length ? <section className="sql-inner-trace" aria-label="부속질의의 중간 결과표">
+      <strong>부속질의 안쪽 결과 따라가기</strong>
+      <p>각 SELECT가 반환한 값을 결과표로 나란히 표시합니다. 이 결과가 바깥 질의의 조건으로 전달됩니다.</p>
+      <div className="sql-inner-result-grid">{trace.subqueries.map((stage, index) => <article className="sql-inner-result-card" key={index} data-selected={innerIndex === index}>
+        <header><div><span>안쪽 단계 {index + 1}</span><h4>{stage.trace.refs.length ? [...new Set(stage.trace.refs.map(ref => ref.name))].join(' · ') : '부속질의'} 결과표</h4></div><button type="button" aria-pressed={innerIndex === index} onClick={() => setInnerIndex(index)}>{innerIndex === index ? '원본 강조 중' : '원본에서 강조'}</button></header>
+        {stage.result ? <SqlTable data={stage.result} caption={`단계 ${index + 1}이 바깥으로 넘기는 결과`}/> : <p className="sql-inner-unavailable">외부 행에 따라 달라지는 등 단독 결과를 계산할 수 없는 단계입니다.</p>}
+        {stage.note ? <p>{stage.note}</p> : null}
+        <details><summary>이 표를 만든 SQL</summary><pre className="sql-code">{stage.trace.sql}</pre></details>
+      </article>)}</div>
+      <p>파란색은 바깥 질의, 보라색은 선택한 단계에 참여한 원본 행입니다. 양쪽에 참여하면 ‘바깥·안쪽’ 표시가 함께 나옵니다.</p>
+      {inner ? <div className="sql-inner-selected"><strong>원본 테이블에서 강조하는 단계 {innerIndex + 1}</strong><pre className="sql-code">{inner.trace.sql}</pre>{inner.trace.note ? <p>{inner.trace.note}</p> : null}{inner.trace.grouped ? <p>집계 결과표에는 계산된 값이, 아래 원본에는 그 계산에 사용한 행들이 보라색으로 표시됩니다.</p> : null}</div> : null}
+      <p>결과표는 SELECT의 조회 결과이며 원본 DB에 새 테이블을 저장하는 것은 아닙니다. 단계는 이해를 돕기 위해 안쪽부터 나열했으며 실제 DBMS의 물리적 실행 순서를 뜻하지 않습니다.</p>
+    </section> : null}
     {sources.map(source => {
       const refs = trace?.refs.map((ref, index) => ({ ...ref, index })).filter(ref => ref.name === source.name) ?? []
       const columns = new Set(refs.flatMap(ref => ref.columns))

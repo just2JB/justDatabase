@@ -1,23 +1,42 @@
 import { useState } from 'react'
 import type { Database } from 'sql.js'
 import type { SqlResult } from '../data/sqlLessonData'
+import { tokenizeSql } from '../data/sqlTokens'
+import { SqlTable } from './SqlLessonParts'
+import './sql-subquery-trace.css'
 
 type Source = { name: string; data: SqlResult }
-export type SourceTrace = { sql: string; refs: { name: string; alias: string; columns: string[] }[]; links: (string | number | null)[][]; grouped: boolean; limited: boolean; note?: string }
+export type SourceTrace = { sql: string; refs: { name: string; alias: string; columns: string[] }[]; links: (string | number | null)[][]; grouped: boolean; limited: boolean; note?: string; subqueries?: { trace: SourceTrace; result?: SqlResult; note?: string }[] }
+
+function maskedSql(sql: string) {
+  return tokenizeSql(sql).map(token => token.kind === 'string' || token.kind === 'comment' ? token.text.replace(/[^\n]/g, ' ') : token.text).join('')
+}
+
+// 닫는 괄호를 만나는 순서대로 모아 가장 안쪽 SELECT부터 설명합니다.
+function subqueryRanges(sql: string) {
+  const masked = maskedSql(sql)
+  const stack: number[] = [], ranges: { start: number; end: number }[] = []
+  for (let index = 0; index < masked.length; index++) {
+    if (masked[index] === '(') stack.push(index)
+    if (masked[index] === ')') {
+      const start = stack.pop()
+      if (start !== undefined && /^\s*select\b/i.test(masked.slice(start + 1, index))) ranges.push({ start, end: index + 1 })
+    }
+  }
+  return ranges
+}
 
 // 문자열·괄호 내부를 가려 바깥 SELECT문의 절만 찾습니다.
 function outerSql(sql: string) {
-  let depth = 0, quote = ''
-  return [...sql].map(char => {
-    if (quote) { if (char === quote) quote = ''; return ' ' }
-    if (char === "'" || char === '"') { quote = char; return ' ' }
+  let depth = 0
+  return maskedSql(sql).split('').map(char => {
     if (char === '(') { depth++; return ' ' }
     if (char === ')') { depth--; return ' ' }
     return depth ? ' ' : char
   }).join('')
 }
 
-export function buildSourceTrace(db: Database, sql: string, sources: Source[]): SourceTrace {
+function buildSourceTraceCore(db: Database, sql: string, sources: Source[]): SourceTrace {
   const empty: SourceTrace = { sql, refs: [], links: [], grouped: false, limited: false }
   try {
     const outer = outerSql(sql)
@@ -36,7 +55,9 @@ export function buildSourceTrace(db: Database, sql: string, sources: Source[]): 
       refs.push({ name: source.name, alias: match[2] && !reserved.test(match[2]) ? match[2] : match[1], columns: [] })
     }
     if (!refs.length || /\b(natural|using)\b/i.test(tablePart) || /\bfrom\s*\(/i.test(sql.slice(from.index))) return { ...empty, note: '이 조인 구문은 아직 행 연결을 표시하지 않습니다.' }
-    const projection = sql.slice(0, from.index).replace(/'([^']|'')*'/g, '').replace(/\bcount\s*\(\s*\*\s*\)/gi, 'count()').replace(/\bas\s+[a-z_]\w*/gi, '')
+    let projection = sql.slice(0, from.index)
+    for (const range of subqueryRanges(projection).sort((a, b) => b.start - a.start)) projection = projection.slice(0, range.start) + ' '.repeat(range.end - range.start) + projection.slice(range.end)
+    projection = projection.replace(/'([^']|'')*'/g, '').replace(/\bcount\s*\(\s*\*\s*\)/gi, 'count()').replace(/\bas\s+[a-z_]\w*/gi, '')
     for (const ref of refs) {
       const source = sources.find(item => item.name === ref.name)!
       const tokens = projection.match(/[a-z_]\w*(?:\.[a-z_]\w*|\.\*)?|\*/gi) ?? []
@@ -53,16 +74,38 @@ export function buildSourceTrace(db: Database, sql: string, sources: Source[]): 
   }
 }
 
+export function buildSourceTrace(db: Database, sql: string, sources: Source[]): SourceTrace {
+  const trace = buildSourceTraceCore(db, sql, sources)
+  trace.subqueries = subqueryRanges(sql).map(range => {
+    const inner = sql.slice(range.start + 1, range.end - 1).trim()
+    const innerTrace = buildSourceTraceCore(db, inner, sources)
+    try {
+      const output = db.exec(`select * from (${inner}) limit 101`)[0]
+      const result: SqlResult = { columns: output?.columns ?? [], rows: (output?.values.slice(0, 100) ?? []).map(row => row.map(value => typeof value === 'string' || typeof value === 'number' ? value : null)) }
+      return { trace: innerTrace, result, note: (output?.values.length ?? 0) > 100 ? '중간 결과는 처음 100행까지만 표시합니다.' : undefined }
+    } catch {
+      return { trace: innerTrace, note: '외부 행을 참조하는 상관 부속질의 등은 안쪽 SQL만 단독 실행할 수 없습니다. 이 단계의 보라색 행은 표시하지 않으며 바깥 질의의 참여 행만 확인할 수 있습니다.' }
+    }
+  })
+  return trace
+}
+
 export default function SqlSourceTrace({ sources, trace }: { sources: Source[]; trace: SourceTrace | null }) {
   const [chosen, setChosen] = useState<number | null>(null)
+  const [innerIndex, setInnerIndex] = useState(0)
   const selected = chosen !== null ? trace?.links[chosen] : undefined
+  const inner = trace?.subqueries?.[innerIndex]
   return <div className="sql-source-trace">
     {trace ? <div className="sql-trace-summary"><strong>실행한 SQL의 원본 연결</strong><pre>{trace.sql}</pre>{trace.note ? <p>{trace.note}</p> : null}{trace.refs.length ? <><p>파란 행: 조건에 참여한 원본 행 · 초록 열: SELECT에서 사용한 속성. 실행 후 입력을 수정해도 이 표시는 마지막 실행 기준입니다.</p><p>{trace.grouped ? '집계 전 원본 행을 표시합니다. GROUP BY·HAVING·DISTINCT 결과의 각 행과 일대일 대응하지 않습니다.' : '연결 묶음을 선택하면 함께 연결된 원본 행만 강조합니다.'} {trace.limited ? '연결은 처음 500개까지만 표시합니다.' : ''}</p><div className="sql-trace-links"><button type="button" aria-pressed={chosen === null} onClick={() => setChosen(null)}>참여 행 전체</button>{trace.links.map((link, index) => <button type="button" key={index} aria-pressed={chosen === index} onClick={() => setChosen(index)}>연결 {index + 1}: {link.map((key, i) => `${trace.refs[i].alias} #${key ?? 'NULL'}`).join(' ↔ ')}</button>)}</div>{!trace.links.length ? <p>조건에 참여한 원본 행이 없습니다.</p> : null}</> : null}</div> : <p className="visual-caption">SQL을 실행하면 연결된 원본 행과 SELECT에 사용한 열을 여기에 표시합니다.</p>}
+    {trace?.subqueries?.length ? <section className="sql-inner-trace" aria-label="부속질의가 선택한 원본 행"><strong>부속질의 안쪽 결과 따라가기</strong><p>파란색은 바깥 질의, 보라색은 선택한 부속질의 조건에 참여한 원본 행입니다. 둘 다 참여하면 두 색과 ‘바깥·안쪽’ 표시가 함께 나옵니다.</p><div className="sql-option-buttons" role="group" aria-label="안쪽 부속질의 선택">{trace.subqueries.map((_, index) => <button key={index} type="button" aria-pressed={innerIndex === index} onClick={() => setInnerIndex(index)}>안쪽 단계 {index + 1}</button>)}</div>{inner ? <><pre className="sql-code">{inner.trace.sql}</pre>{inner.note ? <p>{inner.note}</p> : null}{inner.trace.note ? <p>{inner.trace.note}</p> : null}{inner.trace.grouped ? <p>집계 함수는 보라색 행들로 값을 계산합니다. 보라색은 집계 전 참여 행이며 최종 SELECT 결과와 다를 수 있습니다.</p> : null}{inner.result ? <SqlTable data={inner.result} caption="부속질의가 바깥 조건에 넘기는 값"/> : null}</> : null}<p>단계는 이해를 돕기 위해 안쪽부터 나열했습니다. 실제 DBMS의 물리적 실행 순서를 뜻하지 않습니다.</p></section> : null}
     {sources.map(source => {
       const refs = trace?.refs.map((ref, index) => ({ ...ref, index })).filter(ref => ref.name === source.name) ?? []
       const columns = new Set(refs.flatMap(ref => ref.columns))
       const ids = new Set<string | number | null>(refs.flatMap(ref => selected ? [selected[ref.index]] : trace?.links.map(link => link[ref.index]) ?? []).filter(id => id !== null))
-      return <article className="sql-source-table" key={source.name}><h4>{source.name}</h4><div className="table-wrap"><table className="sql-result-table"><caption>{source.name} 원본 · {source.data.rows.length}행</caption><thead><tr>{source.data.columns.map(column => <th key={column} scope="col" className={columns.has(column) ? 'sql-trace-column' : undefined}>{column}{columns.has(column) ? <small>SELECT</small> : null}</th>)}</tr></thead><tbody>{source.data.rows.map((row, index) => <tr key={index} className={ids.has(row[0]) ? 'sql-trace-row' : undefined}>{row.map((cell, col) => <td key={col} className={columns.has(source.data.columns[col]) ? 'sql-trace-column' : undefined}>{cell ?? 'NULL'}</td>)}</tr>)}</tbody></table></div></article>
+      const innerRefs = inner?.result ? inner.trace.refs.map((ref, index) => ({ ...ref, index })).filter(ref => ref.name === source.name) : []
+      const innerIds = new Set<string | number | null>((innerRefs ?? []).flatMap(ref => inner!.trace.links.map(link => link[ref.index])).filter(id => id !== null))
+      const innerColumns = new Set((innerRefs ?? []).flatMap(ref => ref.columns))
+      return <article className="sql-source-table" key={source.name}><h4>{source.name}</h4><div className="table-wrap"><table className="sql-result-table"><caption>{source.name} 원본 · {source.data.rows.length}행</caption><thead><tr>{source.data.columns.map(column => <th key={column} scope="col" className={columns.has(column) ? 'sql-trace-column' : undefined}>{column}{columns.has(column) ? <small>바깥 SELECT</small> : null}{innerColumns.has(column) ? <small className="sql-inner-column-label">안쪽 SELECT</small> : null}</th>)}</tr></thead><tbody>{source.data.rows.map((row, index) => <tr key={index} className={`${ids.has(row[0]) ? 'sql-trace-row' : ''} ${innerIds.has(row[0]) ? 'sql-trace-inner-row' : ''}`}>{row.map((cell, col) => <td key={col} className={columns.has(source.data.columns[col]) ? 'sql-trace-column' : undefined}>{cell ?? 'NULL'}{col === 0 && innerIds.has(row[0]) ? <small className="sql-inner-row-label">{ids.has(row[0]) ? '바깥·안쪽' : '안쪽'}</small> : null}</td>)}</tr>)}</tbody></table></div></article>
     })}
   </div>
 }

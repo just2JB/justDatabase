@@ -1,6 +1,6 @@
 import type { PracticeQuestion } from '../components/ExamSession'
 
-export type CourseId = 'database' | 'algorithm'
+export type CourseId = 'database' | 'algorithm' | 'engineering-project'
 export type ReviewResponse = { text: string; choice?: number; selections?: number[]; submitted?: boolean; review?: 'correct' | 'again' }
 export type ReviewQuestion = PracticeQuestion & { multiOptions?: string[]; correctSelections?: number[]; numericSequence?: number[]; sourceIndex?: number; unit?: string }
 export type ReviewSource = { key: string; label: string; course: CourseId; format: 'concept' | 'exam' | 'relation' | 'quick'; questions: ReviewQuestion[]; initial?: Record<string, unknown> }
@@ -29,7 +29,7 @@ export function readMistakes(): Mistake[] {
     if (typeof value.updatedAt !== 'string' || value.updatedAt !== '' && Number.isNaN(Date.parse(value.updatedAt))) return false
     if (value.lastWrong.choice !== undefined && !(typeof value.lastWrong.choice === 'number' && Number.isInteger(value.lastWrong.choice))) return false
     if (value.lastWrong.selections !== undefined && !(Array.isArray(value.lastWrong.selections) && value.lastWrong.selections.every(item => typeof item === 'number' && Number.isInteger(item) && item >= 0))) return false
-    return typeof value.source === 'string' && typeof value.questionId === 'string' && value.id === mistakeId(value.source, value.questionId) && (value.course === 'database' || value.course === 'algorithm') && (value.status === 'open' || value.status === 'resolved') && typeof value.misses === 'number' && Number.isInteger(value.misses) && value.misses > 0 && typeof value.updatedAt === 'string' && typeof value.lastWrong.text === 'string'
+    return typeof value.source === 'string' && typeof value.questionId === 'string' && value.id === mistakeId(value.source, value.questionId) && (value.course === 'database' || value.course === 'algorithm' || value.course === 'engineering-project') && (value.status === 'open' || value.status === 'resolved') && typeof value.misses === 'number' && Number.isInteger(value.misses) && value.misses > 0 && typeof value.updatedAt === 'string' && typeof value.lastWrong.text === 'string'
   })
 }
 function persist(entries: Mistake[]) {

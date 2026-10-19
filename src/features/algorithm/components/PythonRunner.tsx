@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { pythonExercises } from '../data/pythonExercises'
 import { pythonSolutions } from '../data/pythonSolutions'
+import './python-practice.css'
 
 type Draft = { code: string; input: string }
 const storageKey = 'justStudy.algorithm.python.v1'
@@ -68,20 +69,78 @@ export default function PythonRunner() {
   }
 
   const topics = [...new Set(pythonExercises.map(e => e.topic))]
-  return <section id="python-practice" className="python-practice" aria-labelledby="python-practice-title">
-    <div className="algorithm-section-heading"><h2 id="python-practice-title">Python 연습실</h2><span>직접 작성하고 실행하기</span></div>
-    <label className="python-select">연습 선택<select disabled={status !== 'idle'} value={selected} onChange={e => { setSelected(e.target.value); setOutput(''); setError(''); setHint(false); setShowSolution(false); setComparison(null); setMilliseconds(null) }}>{topics.map(topic => <optgroup label={topic} key={topic}>{pythonExercises.filter(e => e.topic === topic).map(e => <option value={e.id} key={e.id}>{e.title}</option>)}</optgroup>)}</select></label>
-    <div className="python-task">
-      <span className="course-tag">{exercise.topic}</span><h3>{exercise.title}</h3><p>{exercise.task}</p>
-      <div className="python-help-actions">
-        <button type="button" className="python-hint-button" aria-expanded={hint} onClick={() => setHint(!hint)}>{hint ? '힌트 접기' : '힌트 보기'}</button>
-        {solution ? <button type="button" className="python-solution-button" aria-expanded={showSolution} onClick={() => setShowSolution(!showSolution)}>{showSolution ? '모범 답안 접기' : '모범 답안 확인'}</button> : null}
-      </div>
-      {hint ? <p className="python-hint content-enter">{exercise.hint}</p> : null}
-      {showSolution && solution ? <div className="python-solution content-enter"><p>가능한 구현 중 하나입니다. 현재 작성 중인 코드는 그대로 유지됩니다.</p><pre><code>{solution}</code></pre></div> : null}
-      {!solution ? <p className="python-solution-empty">자유 실습은 정해진 모범 답안 없이 직접 설계해 보는 문제입니다.</p> : null}
+  const exerciseIndex = pythonExercises.findIndex(item => item.id === exercise.id)
+  const busy = status !== 'idle'
+
+  function chooseExercise(id: string) {
+    setSelected(id)
+    setOutput(''); setError(''); setHint(false); setShowSolution(false)
+    setComparison(null); setMilliseconds(null)
+  }
+
+  return <section id="python-practice" className="python-practice python-practice-runner" aria-labelledby="python-practice-title">
+    <header className="python-runner-header">
+      <h2 id="python-practice-title">직접 Python 작성하기</h2>
+      <p>문제를 읽고 Python을 작성한 뒤 실행 결과를 확인하세요.</p>
+    </header>
+    <div className="python-question-picker">
+      <label className="python-select"><span className="sr-only">연습 문제</span>
+        <select disabled={busy} value={selected} onChange={event => chooseExercise(event.target.value)}>
+          {topics.map(topic => <optgroup label={topic} key={topic}>{pythonExercises.filter(item => item.topic === topic).map(item => <option value={item.id} key={item.id}>{pythonExercises.indexOf(item) + 1}. {item.title}</option>)}</optgroup>)}
+        </select>
+      </label>
+      <span className="python-picker-count" aria-live="polite">{exerciseIndex + 1}/{pythonExercises.length}</span>
+      <button type="button" disabled={busy || exerciseIndex === 0} onClick={() => chooseExercise(pythonExercises[exerciseIndex - 1].id)} title="이전 문제" aria-label="이전 문제">←</button>
+      <button type="button" disabled={busy || exerciseIndex === pythonExercises.length - 1} onClick={() => chooseExercise(pythonExercises[exerciseIndex + 1].id)} title="다음 문제" aria-label="다음 문제">→</button>
     </div>
-    <div className="python-workspace"><div><label className="python-field" htmlFor="python-code">Python 코드</label><textarea id="python-code" className="python-code" spellCheck={false} value={draft.code} disabled={status !== 'idle'} onChange={e => update('code', e.target.value)} onKeyDown={e => { if (e.key === 'Tab') { e.preventDefault(); const element = e.currentTarget; const start = element.selectionStart; const end = element.selectionEnd; update('code', draft.code.slice(0, start) + '    ' + draft.code.slice(end)); requestAnimationFrame(() => element.setSelectionRange(start + 4, start + 4)) } }} /><label className="python-field" htmlFor="python-input">입력값 · input() 호출 순서대로 한 줄씩</label><textarea id="python-input" className="python-input" spellCheck={false} value={draft.input} disabled={status !== 'idle'} onChange={e => update('input', e.target.value)} placeholder={'예: 메뉴 번호와 점수를 한 줄씩 입력\n1\n90\n80\n70\n0'} /><div className="python-actions"><button type="button" className="python-run" disabled={status !== 'idle' || !draft.code.trim()} onClick={run}>{status === 'loading' ? 'Python 준비 중…' : status === 'running' ? '실행 중…' : '▶ Python 실행'}</button>{status !== 'idle' ? <button type="button" onClick={() => stop()}>중지</button> : null}<button type="button" disabled={status !== 'idle'} onClick={() => { setDrafts(previous => ({ ...previous, [exercise.id]: { code: exercise.starter, input: '' } })); setOutput(''); setError(''); setComparison(null); setMilliseconds(null) }}>시작 코드로 복원</button></div><p className="python-note">{saveError ? '저장 공간을 사용할 수 없어 현재 화면에서만 작업합니다.' : '코드와 입력값은 이 브라우저에 문제별로 자동 저장됩니다.'}</p></div><div className="python-results"><h3>실행 결과</h3><p className="python-note" role="status">{status === 'loading' ? '처음 실행할 때 Python을 내려받습니다. 잠시 기다려 주세요.' : status === 'running' ? '코드를 실행하고 있습니다.' : milliseconds !== null ? `실행 시간 ${(milliseconds / 1000).toFixed(4)}초 · 준비 시간 제외` : '코드를 실행하면 출력이 여기에 표시됩니다.'}</p><pre className="python-output" aria-label="Python 표준 출력">{output || '(출력 없음)'}</pre>{error ? <pre className="python-error" role="alert">{error}</pre> : null}{comparison ? <p className="python-comparison" role="status">{comparison}</p> : null}{exercise.expected ? <details className="python-expected"><summary>기본 예시의 예상 출력</summary><pre>{exercise.expected}</pre><p>시작 코드의 입력 기준입니다. 전체 정답 판정은 아닙니다. 디버깅 출력이 추가되면 다르게 표시됩니다.</p></details> : null}</div></div>
+    <div className="python-task">
+      <span className="python-question-badge">{exercise.topic} · {exercise.title}</span>
+      <p>{exercise.task}</p>
+    </div>
+    <div className="python-workspace">
+      <div className="python-editor-pane">
+        <label className="python-field" htmlFor="python-code">Python 입력</label>
+        <textarea id="python-code" className="python-code" spellCheck={false} value={draft.code} disabled={busy} onChange={event => update('code', event.target.value)} onKeyDown={event => {
+          if (event.key === 'Tab') {
+            event.preventDefault()
+            const element = event.currentTarget
+            const start = element.selectionStart
+            const end = element.selectionEnd
+            update('code', draft.code.slice(0, start) + '    ' + draft.code.slice(end))
+            requestAnimationFrame(() => element.setSelectionRange(start + 4, start + 4))
+          }
+          if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+            event.preventDefault()
+            run()
+          }
+        }} />
+        <label className="python-field" htmlFor="python-input">입력값 · input() 호출 순서대로 한 줄씩</label>
+        <textarea id="python-input" className="python-input" spellCheck={false} value={draft.input} disabled={busy} onChange={event => update('input', event.target.value)} placeholder={'예: 메뉴 번호와 점수를 한 줄씩 입력\n1\n90\n80\n70\n0'} />
+        <div className="python-actions" role="group" aria-label="Python 실습 도구">
+          <div className="python-action-group">
+            <button type="button" className="python-run" disabled={busy || !draft.code.trim()} onClick={run}>{status === 'loading' ? 'Python 준비 중…' : status === 'running' ? '실행 중…' : '▶ 실행'}</button>
+            {busy ? <button type="button" onClick={() => stop()}>중지</button> : null}
+            <button type="button" disabled={busy} onClick={() => { setDrafts(previous => ({ ...previous, [exercise.id]: { code: exercise.starter, input: '' } })); setOutput(''); setError(''); setComparison(null); setMilliseconds(null) }}>초기화</button>
+          </div>
+          <div className="python-action-group python-action-learning">
+            <button type="button" aria-expanded={hint} aria-controls="python-hint" onClick={() => setHint(!hint)}>{hint ? '힌트 접기' : '힌트'}</button>
+            {solution ? <button type="button" aria-expanded={showSolution} aria-controls="python-solution" onClick={() => setShowSolution(!showSolution)}>{showSolution ? '답안 접기' : '모범 답안'}</button> : null}
+          </div>
+        </div>
+        <p className="python-note">{saveError ? '저장 공간을 사용할 수 없어 현재 화면에서만 작업합니다.' : '코드와 입력값은 이 브라우저에 문제별로 자동 저장됩니다.'}</p>
+      </div>
+      <section className="python-results" aria-label="Python 실행 결과" aria-busy={busy}>
+        <h3>실행 결과</h3>
+        <p className="python-note" role="status">{status === 'loading' ? '처음 실행할 때 Python을 내려받습니다. 잠시 기다려 주세요.' : status === 'running' ? '코드를 실행하고 있습니다.' : milliseconds !== null ? `실행 시간 ${(milliseconds / 1000).toFixed(4)}초 · 준비 시간 제외` : 'Python을 작성하고 실행하면 여기에 결과가 표시됩니다.'}</p>
+        <pre className="python-output" aria-label="Python 표준 출력">{output || '(출력 없음)'}</pre>
+        {error ? <pre className="python-error" role="alert">{error}</pre> : null}
+        {comparison ? <p className="python-comparison" role="status">{comparison}</p> : null}
+        {exercise.expected ? <details className="python-expected"><summary>기본 예시의 예상 출력</summary><pre>{exercise.expected}</pre><p>시작 코드의 입력 기준입니다. 전체 정답 판정은 아닙니다. 디버깅 출력이 추가되면 다르게 표시됩니다.</p></details> : null}
+      </section>
+    </div>
+    {hint ? <div id="python-hint" className="python-hint content-enter" role="note"><strong>풀이 방향</strong><p>{exercise.hint}</p></div> : null}
+    {showSolution && solution ? <div id="python-solution" className="python-solution content-enter"><strong>모범 답안</strong><p>가능한 구현 중 하나입니다. 현재 작성 중인 코드는 그대로 유지됩니다.</p><pre><code>{solution}</code></pre></div> : null}
+    {!solution ? <p className="python-solution-empty">자유 실습은 정해진 모범 답안 없이 직접 설계해 보는 문제입니다.</p> : null}
     <p className="python-note">브라우저 안에서 실제 Python을 실행합니다. 첫 준비에는 인터넷 연결이 필요합니다. 실행당 변수는 새로 시작하며, 입력이 부족하면 EOFError가 표시됩니다. 실행시간은 기기마다 다르며 PPT의 예시 시간과 같을 필요가 없습니다.</p>
   </section>
 }

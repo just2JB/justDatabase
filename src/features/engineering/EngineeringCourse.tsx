@@ -1,9 +1,17 @@
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useState } from 'react'
 import type { MouseEvent } from 'react'
 import { engineeringLessons } from './lessons'
 import EngineeringSidebar from './EngineeringSidebar'
+import type { EngineeringView } from './EngineeringPractice'
 import FloatingContents from '../../shared/components/FloatingContents'
 import './engineering.css'
+
+const EngineeringPractice = lazy(() => import('./EngineeringPractice'))
+
+function readEngineeringView(): EngineeringView {
+  const view = new URLSearchParams(location.search).get('view')
+  return view === 'exam' || view === 'wrong' ? view : 'check'
+}
 
 const loop = ['실패 테스트와 실제 필터 코드를 읽는다.', '맵기 비교 조건이 반대로 되어 있는지 판단한다.', '비교 조건을 고치고 테스트를 실행한다.', '테스트 결과를 관찰한다. 실패하면 다시 반복한다.']
 const tasks = [
@@ -35,12 +43,6 @@ function Experience({ week }: { week: number }) {
   return <><h3>어느 계층의 책임일까요?</h3><div className="eng-layers">{layers.map((l, i) => <button key={l[0]} aria-pressed={layer === i} onClick={() => setLayer(i)}><strong>{l[0]} 계층</strong><span>{l[1]}</span></button>)}</div><p className="eng-result" aria-live="polite">{layers[layer][2]}</p><p className="eng-small">호출 방향: 표현 → 로직 → 데이터 / 결과는 반대 방향으로 전달됩니다.</p></>
 }
 
-function Checkpoint({ week }: { week: number }) {
-  const lesson = engineeringLessons[week]
-  const [selected, setSelected] = useState<number | null>(null)
-  return <section className="eng-check" aria-labelledby="eng-check-title"><span className="course-eyebrow">QUICK CHECK</span><h2 id="eng-check-title">{lesson.question}</h2><div className="eng-actions">{lesson.choices.map((choice, i) => <button key={choice} aria-pressed={selected === i} onClick={() => setSelected(i)}>{choice}</button>)}</div>{selected !== null ? <p role="status"><strong>{selected === lesson.answer ? '정답이에요. ' : '다시 생각해 보세요. '}</strong>{lesson.explanation}</p> : null}</section>
-}
-
 function readWeek() {
   const value = Number(new URLSearchParams(location.search).get('week') ?? 1)
   return Number.isInteger(value) && value >= 1 && value <= 7 ? value - 1 : 0
@@ -48,23 +50,27 @@ function readWeek() {
 
 export default function EngineeringCourse() {
   const [week, setWeek] = useState(readWeek)
+  const [practice, setPractice] = useState(() => new URLSearchParams(location.search).get('page') === 'quiz')
+  const [view, setView] = useState(readEngineeringView)
   const [destination, setDestination] = useState<{ target: string } | null>(null)
   const lesson = engineeringLessons[week]
   useEffect(() => {
     const restore = () => {
       setWeek(readWeek())
+      setPractice(new URLSearchParams(location.search).get('page') === 'quiz')
+      setView(readEngineeringView())
       setDestination({ target: location.hash.slice(1) || 'main' })
     }
     window.addEventListener('popstate', restore)
     return () => window.removeEventListener('popstate', restore)
   }, [])
   useEffect(() => {
-    document.title = `${lesson.title} · 공학융합프로젝트 · justStudy`
-  }, [lesson.title])
+    document.title = `${practice ? '문제 풀기' : lesson.title} · 공학융합프로젝트 · justStudy`
+  }, [lesson.title, practice])
   useLayoutEffect(() => {
     if (destination) document.getElementById(destination.target)?.scrollIntoView({ behavior: 'instant', block: 'start' })
   }, [destination])
-  const links = [...lesson.concepts.map(([title], i) => ({ title, target: `eng-concept-${i}` })), { title: '라면 앱 예제', target: 'eng-example' }, { title: '직접 체험', target: 'eng-experience' }, { title: '핵심 정리', target: 'eng-takeaway' }, { title: '확인 문제', target: 'eng-check-title' }]
+  const links = [...lesson.concepts.map(([title], i) => ({ title, target: `eng-concept-${i}` })), { title: '라면 앱 예제', target: 'eng-example' }, { title: '직접 체험', target: 'eng-experience' }, { title: '핵심 정리', target: 'eng-takeaway' }]
   function jump(target: string) {
     const url = new URL(location.href)
     url.hash = target
@@ -72,31 +78,47 @@ export default function EngineeringCourse() {
     document.getElementById(target)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' })
   }
   function navigate(page: string, target?: string) {
+    if (page === 'quiz') { openPractice(view); return }
     const nextWeek = Number(page) - 1
     if (!Number.isInteger(nextWeek) || nextWeek < 0 || nextWeek >= engineeringLessons.length) return
-    if (nextWeek === week) { jump(target ?? 'main'); return }
+    if (!practice && nextWeek === week) { jump(target ?? 'main'); return }
     const url = new URL(location.href)
     url.searchParams.set('course', 'engineering-project')
     url.searchParams.set('week', page)
+    url.searchParams.delete('page')
+    url.searchParams.delete('view')
     url.hash = target ?? ''
     history.pushState(null, '', url)
     setWeek(nextWeek)
+    setPractice(false)
     setDestination({ target: target ?? 'main' })
+  }
+  function openPractice(next: EngineeringView) {
+    const url = new URL(location.href)
+    url.searchParams.set('page', 'quiz')
+    url.searchParams.set('view', next)
+    url.hash = ''
+    if (url.href !== location.href) history.pushState(null, '', url)
+    setPractice(true)
+    setView(next)
+    setDestination({ target: 'main' })
   }
   function followWeek(event: MouseEvent<HTMLAnchorElement>, page: number) {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
     navigate(String(page))
   }
-  return <div className="app-shell engineering-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><EngineeringSidebar page={String(week + 1)} onNavigate={navigate} /><FloatingContents key={week} links={links} onJump={jump} /><main id="main"><header className="topbar"><span>공학융합프로젝트 <span className="slash">/</span> {lesson.title}</span></header><div className="document eng-main page-enter">
+  return <div className="app-shell engineering-study-shell"><a className="skip-link" href="#main">본문으로 이동</a><EngineeringSidebar page={practice ? 'quiz' : String(week + 1)} onNavigate={navigate} />{!practice ? <FloatingContents key={week} links={links} onJump={jump} /> : null}<main id="main"><header className="topbar"><span>공학융합프로젝트 <span className="slash">/</span> {practice ? '문제 풀기' : lesson.title}</span></header><div className="document eng-main page-enter">
+    {practice ? <Suspense fallback={<p role="status">문제를 불러오고 있어요.</p>}><EngineeringPractice view={view} onNavigate={openPractice}/></Suspense> : <>
     <header className="eng-intro"><span className="course-eyebrow">ENGINEERING CONVERGENCE PROJECT</span><h1>공학융합프로젝트</h1><p>개념은 명확하게, 예제는 라면 한 그릇처럼 친근하게.</p><p className="eng-small">제공된 1–7주차 강의 자료 기반 · 과제·팀 활동·윤리 내용 제외</p></header>
     <article key={week} className="eng-lesson"><header className="eng-heading"><span className="course-eyebrow">WEEK {String(week + 1).padStart(2, '0')}</span><h2>{lesson.title}</h2><p>{lesson.subtitle}</p></header><p className="eng-summary">{lesson.summary}</p>
       <section aria-label="핵심 개념" className="eng-concepts">{lesson.concepts.map(([title, text], i) => <div id={`eng-concept-${i}`} key={title}><span>{String(i + 1).padStart(2, '0')}</span><div><h3>{title}</h3><p>{text}</p></div></div>)}</section>
       <aside id="eng-example" className="eng-example"><span className="course-eyebrow">이해를 위한 추가 예제 · 밤샘 라면 추천 앱</span><h3>라면 앱에 적용하면?</h3><p>{lesson.example}</p></aside>
       <section id="eng-experience" className="eng-experience" aria-label="개념 직접 확인"><span className="course-eyebrow">TRY IT · 이해를 위한 체험</span><Experience key={week} week={week} /></section>
-      <div id="eng-takeaway" className="eng-takeaway"><strong>기억할 한 문장</strong><p>{lesson.takeaway}</p></div><Checkpoint key={week} week={week} />
-      <footer className="eng-source"><p>강의 근거: {lesson.pages}</p><p>라면 앱 사례·체험·확인 문제는 이해를 위해 추가한 예시입니다.</p></footer>
+      <div id="eng-takeaway" className="eng-takeaway"><strong>기억할 한 문장</strong><p>{lesson.takeaway}</p></div>
+      <footer className="eng-source"><p>강의 근거: {lesson.pages}</p><p>라면 앱 사례·체험은 이해를 위해 추가한 예시입니다.</p></footer>
       <nav className="eng-pagination" aria-label="이전 다음 주차">{week > 0 ? <a href={`?course=engineering-project&week=${week}`} onClick={event => followWeek(event, week)}>← {week}주차</a> : <a href="/">← 전체 과목</a>}{week < 6 ? <a href={`?course=engineering-project&week=${week + 2}`} onClick={event => followWeek(event, week + 2)}>{week + 2}주차 →</a> : <a href="?course=engineering-project&week=1" onClick={event => followWeek(event, 1)}>처음부터 다시 보기 →</a>}</nav>
     </article>
+    </>}
   </div></main></div>
 }

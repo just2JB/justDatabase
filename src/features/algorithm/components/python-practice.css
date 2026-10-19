@@ -1,0 +1,102 @@
+.python-practice-runner {
+  min-width: 0;
+  margin-top: 0;
+  padding: 26px;
+  border: 1px solid #dce4ef;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.python-practice-runner .python-runner-header {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e6ecf4;
+}
+
+.python-runner-header h2 { margin: 0; font-size: 16px; }
+.python-runner-header p { margin-top: 2px; font-size: 11px; color: #71839c; }
+
+.python-practice-runner .python-question-picker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin: 12px 0 10px;
+}
+
+.python-question-picker .python-select { display: block; flex: 1; min-width: 0; margin: 0; }
+.python-practice-runner .python-select select {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid #d4e0ef;
+  border-radius: 6px;
+  background: #fff;
+  font: inherit;
+  font-size: 12px;
+}
+
+.python-picker-count { flex-shrink: 0; font-size: 11px; color: #7a8fa8; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.python-question-picker > button {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 34px;
+  border: 1px solid #d4e0ef;
+  border-radius: 6px;
+  background: #fff;
+  color: #3d6ca5;
+  font: inherit;
+  cursor: pointer;
+}
+.python-question-picker > button:hover:not(:disabled) { background: #edf4ff; border-color: #a7c1e2; }
+.python-question-picker > button:disabled { opacity: .35; cursor: default; }
+
+.python-practice-runner .python-task { margin: 9px 0 14px; padding: 12px 14px; border: 1px solid #e1e9f4; border-radius: 9px; background: #f6f9fd; }
+.python-question-badge { display: inline-block; margin-bottom: 4px; color: #577da6; font-size: 10px; font-weight: 600; line-height: 1.6; }
+.python-practice-runner .python-task p { margin: 0; color: #596f8e; font-size: 12px; line-height: 1.8; }
+.python-practice-runner .python-workspace { grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; margin-top: 12px; }
+.python-editor-pane { min-width: 0; }
+.python-practice-runner .python-field { margin-bottom: 8px; font-size: 12px; }
+.python-practice-runner .python-code { min-height: 300px; padding: 14px; border-color: #d4e0ef; border-radius: 8px; }
+.python-practice-runner .python-input { min-height: 84px; margin-bottom: 0; padding: 10px 14px; border-color: #d4e0ef; border-radius: 8px; }
+.python-practice-runner .python-results { min-width: 0; padding: 17px; border: 1px solid #dce5f1; border-radius: 8px; background: #f8fafd; }
+.python-results h3 { margin: 0; font-size: 14px; }
+.python-practice-runner .python-results .python-note { margin-top: 8px; }
+.python-practice-runner .python-output { min-height: 150px; margin-top: 12px; background: #fff; border: 1px solid #e6ecf4; }
+.python-practice-runner .python-actions { display: flex; justify-content: space-between; gap: 6px; margin-top: 10px; }
+.python-action-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.python-action-learning { margin-left: auto; }
+.python-practice-runner .python-actions button { min-height: 34px; padding: 6px 9px; border-radius: 6px; font-size: 11px; line-height: 1.5; }
+.python-practice-runner .python-actions .python-run { padding-inline: 12px; }
+.python-practice-runner .python-hint { margin: 18px 0 0; padding: 14px 16px; }
+.python-hint strong, .python-solution > strong { font-size: 12px; }
+.python-practice-runner .python-hint p { margin: 6px 0 0; font-size: 12px; line-height: 1.8; }
+.python-practice-runner .python-solution { margin-top: 18px; }
+.python-practice-runner .python-note { font-size: 11px !important; }
+.python-question-picker button:focus-visible, .python-actions button:focus-visible { outline: 2px solid #28775c; outline-offset: 2px; }
+
+@media (min-width: 1200px) {
+  .python-practice-runner .python-workspace { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); }
+  .python-practice-runner .python-results { margin-top: 31px; min-height: 300px; }
+}
+
+@media (max-width: 760px) {
+  .python-practice-runner { padding: 17px; }
+  .python-practice-runner .python-workspace { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .python-practice-runner .python-question-picker { gap: 5px; }
+  .python-practice-runner .python-select select { padding: 7px; font-size: 11px; }
+  .python-picker-count { font-size: 10px; }
+  .python-question-picker > button { width: 29px; }
+  .python-practice-runner .python-task { padding: 10px 12px; }
+  .python-practice-runner .python-task p { font-size: 11px; }
+  .python-practice-runner .python-results { padding: 14px; }
+  .python-practice-runner .python-actions button { min-height: 36px; padding: 6px 8px; }
+}
+
+@media (max-width: 380px) {
+  .python-practice-runner .python-actions button { padding: 6px; font-size: 10px; }
+}

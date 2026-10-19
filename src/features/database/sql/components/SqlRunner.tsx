@@ -7,6 +7,7 @@ import { SqlTable } from './SqlLessonParts'
 import { missionTables, missions } from '../../workbench/missions'
 import { answers } from '../../workbench/answers'
 import './sql-practice.css'
+import './sql-question-compact.css'
 import SqlSourceTrace, { buildSourceTrace } from './SqlSourceTrace'
 import type { SourceTrace } from './SqlSourceTrace'
 import { indentSql } from './sqlIndent'
@@ -16,6 +17,7 @@ import { subqueryLessons } from '../data/subqueryLessons'
 import { workshopSubqueryLessons } from '../data/workshopSubqueryLessons'
 import { SqlHelpCode } from './SqlSelectionHelp'
 import SqlEditor from './SqlEditor'
+import SqlActionBar from './SqlActionBar'
 
 type Exercise = {
   group: string
@@ -326,7 +328,7 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
       <div><h3>직접 쿼리 작성하기</h3><p>문제를 읽고 SQL을 작성한 뒤 실행 결과를 확인하세요.</p></div>
       <div className="sql-runner-tools"><a href={`#sql-source-tables-${dataset}`}>원본 테이블 ↓</a></div>
     </div>
-    {!initialSql ? <label className="sql-runner-label">연습 문제
+    {initialSql === undefined ? <div className="sql-question-picker"><label className="sql-runner-label"><span className="sr-only">연습 문제</span>
       <select value={exercise} disabled={running} onChange={event => chooseExercise(Number(event.target.value))}>
         {groups.map(group => <optgroup key={group} label={group}>
           {activeExercises.map((item, index) => item.group === group
@@ -334,9 +336,9 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
             : null)}
         </optgroup>)}
       </select>
-    </label> : null}
+    </label><span className="sql-picker-count" aria-live="polite">{exercise === 0 ? '자유' : `${exercise}/${activeExercises.length - 1}`}</span><button type="button" disabled={running || exercise <= 1} onClick={() => chooseExercise(exercise - 1)} title="이전 문제" aria-label="이전 문제">←</button><button type="button" disabled={running || exercise >= activeExercises.length - 1} onClick={() => chooseExercise(exercise + 1)} title={exercise === 0 ? '첫 문제 풀기' : '다음 문제'} aria-label={exercise === 0 ? '첫 문제 풀기' : '다음 문제'}>→</button></div> : null}
     {initialSql === undefined && /부속질의/.test(activeExercises[exercise].group) ? <details className="sql-subquery-help"><summary>서브쿼리가 어렵다면? {dataset === 'madang' ? '마당서점' : '공방 예약'} 기초부터 3중 중첩까지 따라가기</summary><SubqueryWalkthrough lessons={dataset === 'madang' ? subqueryLessons : workshopSubqueryLessons}/></details> : null}
-    {initialSql === undefined ? <div className="sql-question-overview"><div className="sql-question-meta"><span>{activeExercises[exercise].group}</span><span aria-live="polite">{exercise === 0 ? '자유 연습' : `${String(exercise).padStart(2, '0')} / ${activeExercises.length - 1}`}</span></div><h4>{activeExercises[exercise].label}</h4><p>{activeExercises[exercise].comment?.replace(/^--\s*/gm, '') ?? '원본 테이블을 참고해 원하는 조회문을 작성해 보세요.'}</p><div className="sql-question-pagination" aria-label="문제 이동"><button type="button" disabled={running || exercise <= 1} onClick={() => chooseExercise(exercise - 1)}>← 이전 문제</button><span>이동해도 작성한 SQL은 유지됩니다.</span><button type="button" disabled={running || exercise >= activeExercises.length - 1} onClick={() => chooseExercise(exercise + 1)}>{exercise === 0 ? '첫 문제 풀기' : '다음 문제 →'}</button></div></div> : null}
+    {initialSql === undefined ? <div className="sql-question-overview sql-question-compact"><span className="sql-question-badge">{activeExercises[exercise].group}</span><p>{activeExercises[exercise].comment?.replace(/^--\s*/gm, '') ?? '원본 테이블을 참고해 원하는 조회문을 작성해 보세요.'}</p></div> : null}
     <div className="sql-editor-result-layout"><div className="sql-editor-pane">
     <label className="sql-runner-label" htmlFor={`sql-runner-input-${dataset}`}>SQL 입력</label>
     <SqlEditor
@@ -365,13 +367,7 @@ function QueryRunner({ initialSql, dataset = 'madang' }: { onOpenTables?: () => 
       }}
     />
     <p className="sql-keyboard-help" id={`sql-keyboard-help-${dataset}`}>구문 더블클릭 또는 Alt+Enter: 설명 → 문법 · Tab: 들여쓰기 · Shift+Tab: 해제 · Esc 후 Tab: 입력창 나가기</p>
-    <div className="sql-runner-actions">
-      <button type="button" className="quiz-primary" disabled={running} onClick={() => void runSql()}>{running ? '실행 중…' : 'SQL 실행'}</button>
-      <button type="button" className="visual-button" disabled={running} onClick={() => { delete drafts.current[exercise]; setSql(initialSql ?? starterSql(activeExercises[exercise])); setResult(null); setTrace(null); setError(''); setShowHint(false); setShowAnswer(false); setAnswerConfirmOpen(false) }}>입력 초기화</button>
-      {exercise > 0 ? <button type="button" className="visual-button" aria-expanded={showHint} onClick={() => setShowHint(value => !value)}>{showHint ? '힌트 숨기기' : '힌트 보기'}</button> : null}
-      {exercise > 0 ? <button type="button" className="visual-button sql-answer-button" aria-expanded={showAnswer} onClick={() => showAnswer ? setShowAnswer(false) : setAnswerConfirmOpen(true)}>{showAnswer ? '모범답안 숨기기' : '모범답안 보기'}</button> : null}
-      <span>Ctrl + Enter로 실행</span>
-    </div>
+    <SqlActionBar busy={running} onRun={() => void runSql()} onReset={() => { delete drafts.current[exercise]; setSql(initialSql ?? starterSql(activeExercises[exercise])); setResult(null); setTrace(null); setError(''); setShowHint(false); setShowAnswer(false); setAnswerConfirmOpen(false) }} onHint={exercise > 0 ? () => setShowHint(value => !value) : undefined} hintOpen={showHint} onAnswer={exercise > 0 ? () => showAnswer ? setShowAnswer(false) : setAnswerConfirmOpen(true) : undefined} answerOpen={showAnswer}/>
     </div><section className="sql-result-pane" aria-label="SQL 실행 결과"><h4>실행 결과</h4>
     {error ? <div className="sql-runner-error" role="alert"><strong>실행 오류</strong><p>{error}</p></div> : null}
     {result ? result.columns.length

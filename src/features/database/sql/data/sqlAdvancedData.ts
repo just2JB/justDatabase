@@ -24,6 +24,7 @@ export const subqueryExercises = [
   ['전체 주문 평균보다 고객별 평균이 큰 고객', 'SELECT c.name, AVG(o.saleprice) AS average\nFROM Customer c JOIN Orders o ON c.custid = o.custid\nGROUP BY c.custid, c.name\nHAVING AVG(o.saleprice) > (SELECT AVG(saleprice) FROM Orders);', '박지성 13,000원 · 추신수 16,500원. 고객별 평균들의 평균이 아니라 모든 주문의 평균 11,800원과 비교한다.'],
 ]
 export const subqueryGroups = [
+  { section: 'subquery-nested', title: '서브쿼리 차근차근 이해하기', keywords: [{ title: '기초 · 중첩 IN · 3중 부속질의', target: 'subquery-nested' }] },
   { section: 'subquery-types', title: '부속질의의 구조', keywords: [{ title: 'WHERE · SELECT · FROM', target: 'subquery-types' }] },
   { section: 'subquery-flow', title: '단일 값 · 집합 · 존재', keywords: [{ title: '스칼라 · IN · EXISTS', target: 'subquery-flow' }] },
   { section: 'subquery-correlated', title: '상관 부속질의', keywords: [{ title: '출판사별 평균과 비교', target: 'subquery-correlated' }] },

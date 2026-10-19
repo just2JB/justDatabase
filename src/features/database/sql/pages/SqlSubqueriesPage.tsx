@@ -3,6 +3,7 @@ import { StudySection } from '../../../../shared/components/StudyComponents'
 import { books, queryExamples } from '../data/sqlLessonData'
 import { SqlCode, SqlTable } from '../components/SqlLessonParts'
 import { advancedExamples, highestBook, subqueryExercises } from '../data/sqlAdvancedData'
+import SubqueryWalkthrough from '../components/SubqueryWalkthrough'
 
 function SubqueryFlow() {
   const [step, setStep] = useState(0)
@@ -32,6 +33,7 @@ export default function SqlSubqueriesPage() {
   const [selected, setSelected] = useState(0)
   const example = advancedExamples[selected]
   return <><div className="page-heading"><h1>부속질의</h1><p>질의 안의 질의로 값·집합·존재 여부를 구하기</p></div>
+    <section id="subquery-nested" aria-label="서브쿼리 기초와 3중 중첩 예제"><SubqueryWalkthrough/></section>
     <StudySection id="subquery-types" number="01" title="부속질의가 들어가는 세 위치"><p className="sql-explanation">부속질의(부질의)는 다른 SQL 문 안에 포함된 SELECT이다. 외부의 주질의가 내부 결과를 사용한다. 위치에 따른 분류와 외부 행을 참조하는지에 따른 분류는 서로 다른 기준이다.</p><div className="dbs-pair">{[['WHERE · 중첩질의', '검색 조건에 사용할 값이나 집합을 만든다.'], ['SELECT · 스칼라 부속질의', '한 값을 결과 열로 표시한다.'], ['FROM · 인라인 뷰', '내부 결과를 테이블처럼 사용한다.']].map(([title, text]) => <article key={title}><h3>{title}</h3><p>{text}</p></article>)}</div><p className="dbs-mini">조인은 테이블을 연결하고, 부속질의는 내부 결과를 활용한다. 어느 쪽이 항상 더 빠르다고 단정할 수 없다. 데이터·인덱스·실행 계획에 따라 달라진다.</p></StudySection>
     <StudySection id="subquery-flow" number="02" title="단일 값 · 여러 값 · 행의 존재"><SubqueryFlow /><div className="table-wrap"><table><thead><tr><th>사용 형태</th><th>내부 결과</th><th>판단 기준</th></tr></thead><tbody><tr><th>price = (SELECT …)</th><td>스칼라 · 한 열, 최대 한 행</td><td>0행이면 NULL, 2행 이상이면 오류</td></tr><tr><th>custid IN (SELECT …)</th><td>한 열의 여러 값 가능</td><td>일치하는 값이 있는가</td></tr><tr><th>EXISTS (SELECT …)</th><td>반환 행</td><td>1행 이상이면 참, 0행이면 거짓</td></tr><tr><th>NOT EXISTS (SELECT …)</th><td>반환 행</td><td>0행이면 참</td></tr></tbody></table></div><p className="dbs-mini">NOT IN의 내부 결과에 NULL이 있으면 일치하지 않는 값도 UNKNOWN이 되어 WHERE에서 제외될 수 있다. 미구매 여부는 고객번호를 연결한 NOT EXISTS로 표현하면 이해하기 쉽다. EXISTS의 SELECT 1은 값 1을 비교하는 것이 아니다.</p><SqlCode>{queryExamples[29].code}</SqlCode><div className="sql-clause-flow"><span>대한미디어 도서번호</span><span>→ 주문 고객번호</span><span>→ 고객 이름</span></div><SqlTable caption="대한미디어 도서 구매 고객" data={queryExamples[29].result()} /></StudySection>
     <StudySection id="subquery-correlated" number="03" title="상관 부속질의: 외부 행을 내부 조건에 전달"><SqlCode>{queryExamples[30].code}</SqlCode><p className="sql-explanation">b2.publisher = b1.publisher에서 b1은 외부 도서, b2는 내부 도서이다. 현재 도서와 같은 출판사의 평균을 구해 현재 도서의 가격과 비교한다.</p><CorrelatedFlow /><SqlTable caption="출판사 평균보다 비싼 도서 전체" data={queryExamples[30].result()} /></StudySection>

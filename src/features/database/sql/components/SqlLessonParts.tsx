@@ -61,6 +61,10 @@ export function JoinPlayground() {
   const code = `SELECT c.custid, c.name, o.orderid, o.saleprice\nFROM Customer c ${mode==='cross'?'CROSS JOIN':mode==='left'?'LEFT JOIN':'INNER JOIN'} Orders o${mode==='cross'?'':'\n  ON c.custid = o.custid'}${customerId==='all'?'':`\nWHERE c.custid = ${customerId}`}\nORDER BY c.custid, o.orderid;`
   const activeCustomer = customers.find(customer=>String(customer.custid)===customerId)
   const matchingCount = activeCustomer ? orders.filter(order=>order.custid===activeCustomer.custid).length : orders.length
+  const outerJoinExample: SqlResult = { columns: ['name', 'saleprice'], rows: customers.flatMap<SqlResult['rows'][number]>(customer => {
+    const matches = orders.filter(order=>order.custid===customer.custid)
+    return matches.length ? matches.map(order=>[customer.name,order.saleprice]) : [[customer.name,null]]
+  }) }
   return <div className="visual-block" id="join-playground"><h3>같은 입력으로 INNER·LEFT·조건 없는 연결 비교하기</h3>
     <label className="relation-select">관찰할 고객<select value={customerId} onChange={event=>setCustomerId(event.target.value)}>{customers.map(customer=><option key={customer.custid} value={customer.custid}>{customer.custid} · {customer.name}{orders.some(order=>order.custid===customer.custid)?'':' · 주문 없음'}</option>)}<option value="all">전체 고객</option></select></label>
     <div className="sql-option-buttons" role="group" aria-label="조인 방식">{[['inner','INNER JOIN'],['left','LEFT JOIN'],['cross','조건 없음 · CROSS JOIN']].map(([value,label])=><button type="button" key={value} aria-pressed={mode===value} onClick={()=>setMode(value)}>{label}</button>)}</div>
@@ -68,6 +72,11 @@ export function JoinPlayground() {
     <details className="sql-live-source"><summary>연결하는 원본 두 표 확인하기</summary><div className="sql-comparison-inputs"><div><h4>왼쪽 · Customer</h4><SqlTable caption="관찰하는 고객" data={{columns:['custid','name'],rows:selectedCustomers.map(customer=>[customer.custid,customer.name])}}/></div><div><h4>오른쪽 · Orders</h4><SqlTable caption="원본 주문 전체" data={{columns:['orderid','custid','saleprice'],rows:orders.map(order=>[order.orderid,order.custid,order.saleprice])}}/></div></div></details>
     <div key={`${mode}-${customerId}`} className="content-enter"><SqlCode>{code}</SqlCode><SqlTable data={data} caption="같은 출력 열로 비교한 조인 결과"/></div>
     <p className="visual-caption">관찰할 고객을 ‘5 · 박세리 · 주문 없음’으로 바꾼 뒤 INNER와 LEFT를 비교하면, 사라지는 행과 보존되는 행의 차이를 확인할 수 있습니다.</p>
+    <div className="sql-topic" id="sql5-outer-join"><h3>외부 조인 예제 · 주문하지 않은 고객도 포함</h3><SqlCode>{`SELECT c.name, o.saleprice
+FROM Customer c
+LEFT JOIN Orders o
+  ON c.custid = o.custid
+ORDER BY c.custid;`}</SqlCode><p className="sql-explanation">왼쪽 Customer의 모든 고객을 먼저 보존하고, 고객번호가 같은 주문을 오른쪽에 붙입니다. 주문이 없는 박세리도 결과에 남으며 Orders의 판매가격은 NULL로 표시됩니다.</p><SqlTable data={outerJoinExample} caption="LEFT JOIN으로 모든 고객을 보존한 결과"/><p className="dbs-mini">RIGHT JOIN은 반대로 오른쪽 테이블을 모두 보존합니다. 실무에서는 테이블 순서를 바꿔 LEFT JOIN으로 표현하는 경우가 많습니다.</p></div>
   </div>
 }
 export function SetPlayground() {

@@ -91,7 +91,7 @@ export const sql5Groups = [
   { section: 'sql5-data', title: '서점 데이터와 검색', keywords: [{ title: 'Book · Customer · Orders', target: 'sql5-data' }, { title: 'SELECT · DISTINCT', target: 'sql5-select' }] },
   { section: 'sql5-conditions', title: '검색 조건과 정렬', keywords: [{ title: 'WHERE · BETWEEN · IN · LIKE', target: 'sql5-conditions' }, { title: 'NULL · ORDER BY', target: 'sql5-order' }] },
   { section: 'sql5-aggregate', title: '집계와 그룹', keywords: [{ title: 'SUM · AVG · COUNT', target: 'sql5-aggregate' }, { title: 'GROUP BY · HAVING', target: 'sql5-group' }] },
-  { section: 'sql5-join', title: '조인과 부속질의', keywords: [{ title: 'INNER · LEFT JOIN', target: 'sql5-join' }, { title: '부속질의 · 상관 부속질의', target: 'sql5-subqueries' }] },
+  { section: 'sql5-join', title: '조인과 부속질의', keywords: [{ title: 'INNER · LEFT JOIN', target: 'sql5-join' }, { title: '외부 조인 예제', target: 'sql5-outer-join' }, { title: '부속질의 · 상관 부속질의', target: 'sql5-subqueries' }] },
   { section: 'sql5-sets', title: '집합과 존재', keywords: [{ title: 'UNION · 차집합 · 교집합', target: 'sql5-sets' }, { title: 'EXISTS · NOT EXISTS', target: 'sql5-exists' }] },
   { section: 'sql5-examples', title: '질의 예제', keywords: [{ title: '질의 3-1~3-33 결과 보기', target: 'sql5-examples' }] },
 ]

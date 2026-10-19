@@ -1,4 +1,5 @@
 import { ddlExamples } from './sqlLessonData'
+import { commandExercises } from './commandExercises'
 
 export type SchemaExercise = { id: string; group: string; title: string; task: string; source: string; setup: string; answer: string; starter: string; tip: string }
 const newBook = 'CREATE TABLE NewBook (bookid INTEGER, bookname VARCHAR(20), publisher VARCHAR(20), price INTEGER);'
@@ -22,6 +23,7 @@ const tasks: Record<number, string> = {
   43: 'NewCustomer를 삭제해 보세요. NewOrders가 참조하므로 처음에는 거절됩니다. 원인을 확인하고 자식 테이블부터 삭제한 뒤 부모를 삭제하세요.',
 }
 export const schemaExercises: SchemaExercise[] = [
+  ...commandExercises,
   { id: 'free', group: '자유 실습', title: '자유롭게 생성·변경·조회하기', task: '실습용 madang에는 Book·Customer·Orders의 복사본이 있습니다. 새 테이블을 만들거나 실습 DB를 생성해 여러 명령을 이어서 실행하세요.', source: '자료 범위 자유 실습', setup: '', answer: '', starter: 'SHOW TABLES;', tip: '한 번 실행한 변경은 이 실습을 떠나거나 DB를 초기화하기 전까지 유지됩니다. 예제 선택 시에는 필요한 선행 테이블을 갖춘 새 실습으로 바뀝니다.' },
   { id: 'database', group: '정의어 · DB 준비', title: 'CREATE DATABASE · USE', task: 'exDB 데이터베이스를 생성한 뒤 USE로 선택하세요. SHOW DATABASES와 SHOW TABLES로 상태를 확인할 수 있습니다.', source: 'SQL 기초 24장', setup: '', answer: 'CREATE DATABASE exDB;\nUSE exDB;\nSHOW TABLES;', starter: '-- exDB를 만들고 선택하세요.\n', tip: 'CREATE DATABASE는 DB를 만들고, USE는 이후 명령을 실행할 DB를 선택합니다. 이름은 대소문자를 구분하지 않는 실습 공간으로 관리합니다.' },
   ...ddlExamples.map(item => ({ id: `ddl-${item.number}`, group: item.number <= 36 ? '정의어 · 테이블 생성' : item.number <= 41 ? '정의어 · 구조 변경' : '정의어 · 테이블 삭제', title: `3-${item.number} · ${item.title}`, task: tasks[item.number], source: `SQL 기초 ${item.number === 34 ? '17' : item.number === 35 ? '19' : item.number === 36 ? '20' : item.number <= 41 ? '22' : '23'}장`, setup: ddlSetup[item.number], answer: item.code, starter: `-- ${tasks[item.number]}\n`, tip: item.note })),

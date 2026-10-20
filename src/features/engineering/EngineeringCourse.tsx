@@ -10,7 +10,7 @@ const EngineeringPractice = lazy(() => import('./EngineeringPractice'))
 
 function readEngineeringView(): EngineeringView {
   const view = new URLSearchParams(location.search).get('view')
-  return view === 'exam' || view === 'wrong' ? view : 'check'
+  return view === 'exam' || view === 'wrong' || view === 'mock1' || view === 'mock2' || view === 'mock3' ? view : 'check'
 }
 
 const loop = ['실패 테스트와 실제 필터 코드를 읽는다.', '맵기 비교 조건이 반대로 되어 있는지 판단한다.', '비교 조건을 고치고 테스트를 실행한다.', '테스트 결과를 관찰한다. 실패하면 다시 반복한다.']

@@ -1,4 +1,5 @@
 import { engineeringLessons } from './lessons'
+import { mockSets } from './engineeringMockSets'
 import type { ReviewQuestion, ReviewSource } from '../../shared/quiz/mistakeStorage'
 
 export const engineeringKinds = { choice: '객관식', blank: '단답형', written: '서술형' }
@@ -50,4 +51,5 @@ export const engineeringMock: ReviewQuestion[] = engineeringLessons.flatMap((_, 
 export const engineeringReviewSources: ReviewSource[] = [
   { key: confirmationKey, label: '확인 문제', course: 'engineering-project', format: 'exam', questions: engineeringConfirmation },
   { key: mockKey, label: '시험 대비 모의고사', course: 'engineering-project', format: 'exam', questions: engineeringMock },
+  ...mockSets.map((set): ReviewSource => ({ key: set.storageKey, label: set.title, course: 'engineering-project', format: 'exam', questions: set.questions })),
 ]

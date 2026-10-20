@@ -10,7 +10,7 @@ import './database-exam.css'
 
 export const databaseReviewSources: ReviewSource[] = [
   { key: `${progressPrefix}concept`, label: '개념 문제', course: 'database', format: 'concept', initial: { ...emptyProgress, ids: quizQuestions.map(question => question.id) }, questions: quizQuestions.map(question => ({ id: question.id, kind: question.type, prompt: question.prompt, options: question.options, correct: question.answer, answer: question.options[question.answer], explanation: question.explanation })) },
-  ...fullMockExams.map(paper => ({ key: `justStudy.database.fullMockExam.${paper.id}.v1`, label: paper.title, course: 'database' as const, format: 'exam' as const, questions: paper.questions })),
+  ...fullMockExams.map(paper => ({ key: paper.storageKey, label: paper.title, course: 'database' as const, format: 'exam' as const, questions: paper.questions })),
   { key: `${progressPrefix}practice`, label: '릴레이션 실습', course: 'database', format: 'relation', questions: practiceQuestions.map((question, index) => {
     const labels = question.mode === 'columns' ? question.columns : question.rows.map((row, rowIndex) => `${rowIndex + 1}번째 투플 · ${row.join(' / ')}`)
     return { id: question.id, kind: 'multiple', prompt: `${question.title} · ${question.prompt}`, multiOptions: labels, correctSelections: question.correct, sourceIndex: index, answer: question.correct.map(value => labels[value]).join(' · '), explanation: question.explanation }

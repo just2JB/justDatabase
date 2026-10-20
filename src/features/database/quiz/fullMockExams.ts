@@ -1,10 +1,12 @@
 import { relationMockExams } from './relationMockExams'
 import type { ExamTable, MockQuestion } from './relationMockExams'
 import type { SqlRow } from '../sql/data/sqlLessonData'
+import { revisedQuestions } from './fullMockVariants'
+import { mixedTheory } from './fullMockTheory'
 
 export type FullMockQuestion = MockQuestion & { unit: string; sqlCheck?: { sql: string; rows: SqlRow[] } }
 export const fullMockUnits = ['데이터·정보', 'DBMS', 'DBS', '관계 모델', 'SQL 정의어', 'SQL 조작어', 'SQL 검색', 'JOIN', '부속질의']
-type DataSet = { title: string; items: [number, string, string, number][]; members: [number, string, string, string | null][]; purchases: [number, number, number, number, number][]; threshold: number; prefix: string }
+export type DataSet = { title: string; items: [number, string, string, number][]; members: [number, string, string, string | null][]; purchases: [number, number, number, number, number][]; threshold: number; prefix: string }
 export const fullMockData: DataSet[] = [
   { title: '문구점', items: [[1,'노트 A','종이',3000],[2,'노트 B','종이',5000],[3,'펜 A','필기',2000],[4,'펜 B','필기',4000],[5,'파일','정리',6000]], members: [[1,'김하늘','서울','010-1111'],[2,'이서준','수원','010-2222'],[3,'박민서','서울',null],[4,'정다은','인천','010-4444']], purchases: [[1,1,1,2,5000],[2,2,3,3,6000],[3,1,2,1,5000],[4,3,4,2,7000],[5,2,1,1,3000],[6,1,3,2,4000]], threshold: 4000, prefix: '노트' },
   { title: '체험용품점', items: [[1,'도예 흙','도예',8000],[2,'도예 도구','도예',12000],[3,'가죽 원단','가죽',10000],[4,'가죽 도구','가죽',16000],[5,'실버 재료','금속',24000]], members: [[1,'오유진','부산','010-5555'],[2,'윤도현','서울',null],[3,'최지우','부산','010-7777'],[4,'한서연','대전','010-8888']], purchases: [[1,2,1,1,7000],[2,1,3,2,18000],[3,3,2,1,12000],[4,2,4,1,15000],[5,1,1,2,14000],[6,2,3,1,9000]], threshold: 12000, prefix: '가죽' },
@@ -76,6 +78,11 @@ export const fullMockExams = fullMockData.map((data, round) => {
     '스키마·자료형·제약조건처럼 데이터에 대한 데이터를 ___라고 한다.',
     'DB 전체의 운영·보안·백업·회복 등을 책임지는 데이터베이스 관리자의 영문 약자는?',
   ][round], ['사전','메타데이터','DBA'][round], [['사전'],['메타데이터','metadata'],['DBA']][round], ['데이터 사전(시스템 카탈로그)은 메타데이터를 관리합니다.','메타데이터는 실제 업무 데이터의 구조와 제약 등을 기술하는 데이터입니다.','DBA는 데이터베이스를 정의하고 운영·관리하는 관리자입니다.'][round]))
+  if (round === 1 || round === 2) {
+    const revised = [...mixedTheory(round), ...revisedQuestions(data, round)]
+    revised.sort((a, b) => Number(a.id.split('-').at(-1)) - Number(b.id.split('-').at(-1)))
+    return { id: `full-${round + 1}`, title: `${round + 1}회 · 전 범위 종합 모의고사`, description: round === 1 ? '무결성 판단·SQL 오류 수정·손코딩 중심의 새로운 문항' : '키 설계·조인 조건·중첩 부속질의 응용 중심의 새로운 문항', context: data.title, questions: revised, storageKey: `justStudy.database.fullMockExam.full-${round + 1}.v2` }
+  }
   const relationIndices = [0,1,9,11,16,19,21,22]
   relationIndices.forEach((source, index) => questions.push({ ...relationMockExams[round].questions[source], id: id(13 + index), unit: '관계 모델' }))
 
@@ -143,5 +150,5 @@ export const fullMockExams = fullMockData.map((data, round) => {
     questions.push({ ...written(id(40), '부속질의', 'NOT EXISTS가 검사하는 대상을 설명하고 결과 item_id를 쓰세요. 내부의 p.item_id = i.item_id 조건을 제거하면 왜 결과가 달라지는지도 설명하세요.', `해당 품목을 구매한 행이 한 건도 없는 품목을 찾으므로 결과는 ${noPurchase.map(row=>row[0]).join(', ')}이다. 내부 연결 조건이 없으면 외부 품목과 무관하게 Purchase에 한 행이라도 있는지만 검사한다. 제시한 데이터에는 구매가 존재하므로 NOT EXISTS가 모든 품목에 대해 FALSE가 되어 0행이 나온다.`, '외부의 각 품목별 존재 검사가 상관 조건 없이 전체 구매 테이블의 존재 검사로 바뀐다는 점을 설명하세요.', [itemTable,purchaseTable], existsSql), sqlCheck: { sql: existsSql, rows: noPurchase } })
   }
   questions.sort((a,b)=>a.id.localeCompare(b.id))
-  return { id: `full-${round + 1}`, title: `${round + 1}회 · 전 범위 종합 모의고사`, description: '데이터·정보 → DBMS → DBS → 관계 모델 → SQL 정의·조작·검색 → JOIN·부속질의', context: data.title, questions }
+  return { id: `full-${round + 1}`, title: `${round + 1}회 · 전 범위 종합 모의고사`, description: '데이터·정보 → DBMS → DBS → 관계 모델 → SQL 정의·조작·검색 → JOIN·부속질의', context: data.title, questions, storageKey: `justStudy.database.fullMockExam.full-${round + 1}.v1` }
 })

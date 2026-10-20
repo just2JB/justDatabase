@@ -3,6 +3,7 @@ import type { ExamTable, MockQuestion } from './relationMockExams'
 import type { SqlRow } from '../sql/data/sqlLessonData'
 import { revisedQuestions } from './fullMockVariants'
 import { mixedTheory } from './fullMockTheory'
+import { balanceMockFormats } from './balancedMockFormats'
 
 export type FullMockQuestion = MockQuestion & { unit: string; sqlCheck?: { sql: string; rows: SqlRow[] } }
 export const fullMockUnits = ['데이터·정보', 'DBMS', 'DBS', '관계 모델', 'SQL 정의어', 'SQL 조작어', 'SQL 검색', 'JOIN', '부속질의']
@@ -79,8 +80,9 @@ export const fullMockExams = fullMockData.map((data, round) => {
     'DB 전체의 운영·보안·백업·회복 등을 책임지는 데이터베이스 관리자의 영문 약자는?',
   ][round], ['사전','메타데이터','DBA'][round], [['사전'],['메타데이터','metadata'],['DBA']][round], ['데이터 사전(시스템 카탈로그)은 메타데이터를 관리합니다.','메타데이터는 실제 업무 데이터의 구조와 제약 등을 기술하는 데이터입니다.','DBA는 데이터베이스를 정의하고 운영·관리하는 관리자입니다.'][round]))
   if (round === 1 || round === 2) {
-    const revised = [...mixedTheory(round), ...revisedQuestions(data, round)]
-    revised.sort((a, b) => Number(a.id.split('-').at(-1)) - Number(b.id.split('-').at(-1)))
+    const ordered = [...mixedTheory(round), ...revisedQuestions(data, round)]
+    ordered.sort((a, b) => Number(a.id.split('-').at(-1)) - Number(b.id.split('-').at(-1)))
+    const revised = balanceMockFormats(ordered, round)
     return { id: `full-${round + 1}`, title: `${round + 1}회 · 전 범위 종합 모의고사`, description: round === 1 ? '무결성 판단·SQL 오류 수정·손코딩 중심의 새로운 문항' : '키 설계·조인 조건·중첩 부속질의 응용 중심의 새로운 문항', context: data.title, questions: revised, storageKey: `justStudy.database.fullMockExam.full-${round + 1}.v2` }
   }
   const relationIndices = [0,1,9,11,16,19,21,22]

@@ -94,7 +94,7 @@ export function buildSourceTrace(db: Database, sql: string, sources: Source[]): 
 export default function SqlSourceTrace({ sources, trace }: { sources: Source[]; trace: SourceTrace | null }) {
   const [chosen, setChosen] = useState<number | null>(null)
   const [innerIndex, setInnerIndex] = useState(0)
-  const [allColumns, setAllColumns] = useState(false)
+  const [allColumns, setAllColumns] = useState(true)
   const selected = chosen !== null ? trace?.links[chosen] : undefined
   const inner = trace?.subqueries?.[innerIndex]
   return <div className="sql-source-trace">
@@ -103,7 +103,7 @@ export default function SqlSourceTrace({ sources, trace }: { sources: Source[]; 
       <details><summary>실행한 SQL · 분석 안내</summary><pre>{trace.sql}</pre><p>마지막 실행 기준입니다. {trace.grouped ? '강조는 집계 전 참여 행으로, GROUP BY·HAVING 결과와 일대일 대응하지 않습니다.' : '연결을 선택하면 해당 조합의 원본 행을 강조합니다.'} {trace.limited ? '연결은 처음 500개까지만 표시합니다.' : ''}</p></details>
       {trace.note ? <p>{trace.note}</p> : null}
       {trace.refs.length ? <div className="sql-trace-connection-picker"><label>연결<select value={chosen ?? 'all'} onChange={event => setChosen(event.target.value === 'all' ? null : Number(event.target.value))}><option value="all">참여 행 전체 · {trace.links.length}개 연결</option>{trace.links.map((link, index) => <option key={index} value={index}>{link.map((key, i) => `${trace.refs[i].alias} #${key ?? 'NULL'}`).join(' ↔ ')}</option>)}</select></label>{!trace.links.length ? <span>조건에 맞는 행 없음</span> : null}</div> : null}
-    </div> : <p className="visual-caption">실행하면 참여 행과 SELECT 열을 강조합니다. 기본은 핵심 열이며 나머지는 ‘전체 열 보기’에서 확인하세요.</p>}
+    </div> : <p className="visual-caption">실행하면 참여 행과 SELECT 열을 강조합니다. 기본은 전체 열 보기이며, 폭이 부족한 표는 가로로 스크롤하세요. ‘핵심 열만 보기’로 줄일 수도 있습니다.</p>}
     {trace?.subqueries?.length ? <section className="sql-inner-trace" aria-label="부속질의의 중간 결과표">
       <header className="sql-inner-heading"><strong>부속질의 결과 따라가기</strong><small>안쪽부터 바깥으로 · 단계 선택 시 원본 강조</small></header>
       <div className="sql-inner-result-grid">{trace.subqueries.map((stage, index) => <article className="sql-inner-result-card" key={index} data-selected={innerIndex === index}>

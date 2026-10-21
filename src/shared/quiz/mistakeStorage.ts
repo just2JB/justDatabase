@@ -2,7 +2,7 @@ import type { PracticeQuestion } from '../components/ExamSession'
 
 export type CourseId = 'database' | 'algorithm' | 'engineering-project'
 export type ReviewResponse = { text: string; choice?: number; selections?: number[]; submitted?: boolean; review?: 'correct' | 'again' }
-export type ReviewQuestion = PracticeQuestion & { multiOptions?: string[]; correctSelections?: number[]; numericSequence?: number[]; sourceIndex?: number; unit?: string }
+export type ReviewQuestion = PracticeQuestion & { multiOptions?: string[]; correctSelections?: number[]; numericSequence?: number[]; numericSequenceLabel?: string; sourceIndex?: number; unit?: string }
 export type ReviewSource = { key: string; label: string; course: CourseId; format: 'concept' | 'exam' | 'relation' | 'quick'; questions: ReviewQuestion[]; initial?: Record<string, unknown> }
 export type Mistake = { id: string; source: string; questionId: string; course: CourseId; status: 'open' | 'resolved'; misses: number; lastWrong: ReviewResponse; updatedAt: string; imported: boolean }
 export const mistakeStorageKey = 'justStudy.mistakes.v1'

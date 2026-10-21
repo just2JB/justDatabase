@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './app/App'
 import './styles/global.css'
 import './styles/study-ui.css'
+import './styles/practice-mobile.css'
 import './styles/scrollbars.css'
 import './styles/diagram-motion.css'
 

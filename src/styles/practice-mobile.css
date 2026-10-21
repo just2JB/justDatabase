@@ -1,0 +1,53 @@
+/* Practice pages: guide folded away, compact progress, readable submit, and on a phone a thumb-reach pager. */
+.exam-guide{margin:14px 0 18px;border:1px solid #dce5ef;border-radius:10px;background:#f8fafc}
+.exam-guide>summary{display:flex;align-items:center;min-height:44px;padding:0 16px;font-size:14px;font-weight:600;color:#405875;cursor:pointer;list-style:none}
+.exam-guide>summary::-webkit-details-marker{display:none}
+.exam-guide>summary::after{content:'';width:7px;height:7px;margin-left:auto;border:solid #5f6b7a;border-width:0 1.5px 1.5px 0;transform:rotate(45deg) translateY(-2px)}
+.exam-guide[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+.exam-guide>:not(summary){margin:0 16px 14px}
+.exam-guide p{font-size:14px;line-height:1.75;color:#405875}
+.exam-guide .eng-practice-guide,.exam-guide .database-exam-guide{margin:0 16px 14px;padding:0;border:0;background:none}
+.exam-guide .eng-practice-guide p{font-size:14px}
+.exam-progress{display:flex;align-items:center;gap:12px;margin:14px 0 4px;font-size:14px;color:#405875;font-variant-numeric:tabular-nums}
+.exam-progress span{white-space:nowrap}
+.exam-progress progress{flex:1;min-width:0;margin:0}
+.exam-number-nav,.exam-pager,.quiz-filter-options{font-variant-numeric:tabular-nums}
+.exam-question:focus{outline:none}
+.exam-question:focus-visible{outline:2px solid #0757ff;outline-offset:2px}
+.exam-session .quiz-primary{min-height:44px;padding:11px 20px;font-size:14px;border-radius:8px}
+.exam-session .quiz-primary:disabled{background:#e6ebf1;color:#4a5568}
+
+@media(max-width:760px){
+  /* Title and tabs: one compact block so the question starts on the first screen. */
+  .document:has(#practice-tabs) h1{font-size:24px;line-height:1.35}
+  .document:has(#practice-tabs) .page-heading{margin-bottom:0}
+  .document:has(#practice-tabs) .page-heading p{font-size:14px;line-height:1.6}
+  .practice-view-tabs{gap:6px;margin:14px -16px 6px;padding:2px 16px 8px;scroll-padding-inline:16px}
+  .practice-view-tabs button{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:22px;justify-content:center}
+  .practice-view-tabs button span{display:none}
+  .practice-view-tabs strong{font-size:14px;font-weight:600;white-space:nowrap}
+  .exam-session>h2{font-size:18px;line-height:1.45}
+  .exam-session .exam-kind-filter{margin:12px -16px 0;padding:2px 16px 6px}
+  .exam-number-nav{margin:10px -16px 14px;padding:4px 16px}
+  .exam-number-nav button{min-width:44px;min-height:44px}
+
+  /* Question card: full ink, bigger choices, full-width submit. */
+  .exam-question h3{font-size:17px;line-height:1.65}
+  .exam-session .quiz-primary{display:block;width:100%;min-height:48px;font-size:15px}
+  .exam-feedback p{font-size:15px;line-height:1.75}
+
+  /* Prev / next stays under the thumb while reading the current question. */
+  .exam-pager{position:sticky;bottom:0;z-index:30;margin:16px -16px 0;padding:8px 16px calc(8px + env(safe-area-inset-bottom));border:0;border-top:1px solid #dce5ef;border-radius:0;background:#fff}
+  .exam-pager button{flex:1;min-height:48px;font-size:14px;font-weight:600}
+  .exam-pager button:last-child{background:#1d1f20;border-color:#1d1f20;color:#fff}
+  .exam-pager button:last-child:disabled{background:#e6ebf1;border-color:#e6ebf1;color:#4a5568;opacity:1}
+  .exam-pager span{flex:0 0 auto;font-size:13px;color:#405875}
+  /* While typing, the keyboard already takes the bottom of the screen. */
+  .exam-session:has(textarea:focus,input:focus) .exam-pager{position:static}
+
+  /* The course menu button shrinks to a circle at the end of the pager row. */
+  body:has(.mobile-toc-trigger) .exam-pager{padding-right:68px}
+  body:has(.exam-pager) .mobile-toc-trigger{left:auto;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));width:44px;min-width:0;height:44px;min-height:0;padding:0;border-radius:50%;box-shadow:none;border:1px solid #c4d7f2;background:#fff;color:#295b9d}
+  body:has(.exam-pager) .mobile-toc-trigger span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+}
+@media(max-width:760px){.mobile-toc-trigger,.lesson-contents-trigger{box-shadow:none}}

@@ -10,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from algo_engine import (bfs_order, binary_search, dfs_order, fmt, insertion_passes, merge_sort_trace,
                          quick_rounds, run_python, selection_passes, seq_variants, string_match, topo_order)
+from recurrence_explanations import EXPLANATIONS
 
 APP_FILE = Path(sys.argv[1])
 VAULT_DIR = Path(sys.argv[2])
@@ -190,10 +191,10 @@ set1 = [
       code=loop1, accepted=nums(c1)),
     q('analysis', 'T(n) = T(n−1) + n, T(1) = 1을 연속 대치법으로 풀고 시간 복잡도를 쓰시오. 풀이 과정을 쓰세요.',
       'T(n) = T(n−1) + n = T(n−2) + (n−1) + n = … = T(1) + 2 + 3 + … + n = n(n+1)/2 → O(n²)',
-      '대치 → 일반형 T(n−k) + (n−k+1) + … + n → n−k = 1에서 k = n−1 → 1 + 2 + … + n. (n = 1~39 대입 검산 완료)'),
+      EXPLANATIONS['r1']),
     q('analysis', 'T(n) = T(n/2) + n, T(1) = 1을 연속 대치법으로 풀고 시간 복잡도를 쓰시오. (n은 2의 거듭제곱) 풀이 과정을 쓰세요.',
       'T(n) = T(n/2) + n = T(n/4) + n/2 + n = … = T(n/2ᵏ) + n(1 + 1/2 + … + 1/2ᵏ⁻¹) = T(n/2ᵏ) + 2n − 2n/2ᵏ. n/2ᵏ = 1이면 T(n) = 1 + 2n − 2 = 2n − 1 → O(n)',
-      '등비수열 합이 2n을 넘지 않는다는 게 핵심이에요. (n = 1, 2, 4, …, 64 검산 완료)'),
+      EXPLANATIONS['r2']),
     code_q('recursion', '출력 결과를 쓰시오.', 'def f(n):\n    if n <= 0:\n        return 0\n    return n + f(n - 2)\n\nprint(f(7))',
            '7 + f(5) = 7 + 5 + f(3) = … = 7 + 5 + 3 + 1 + f(-1)(=0)'),
     code_q('recursion', '출력 결과를 줄마다 순서대로 쓰시오.',
@@ -225,10 +226,10 @@ set2 = [
       code=loop2, accepted=nums(c2)),
     q('analysis', 'T(n) = T(n−1) + 2n, T(1) = 2를 연속 대치법으로 풀고 시간 복잡도를 쓰시오. 풀이 과정을 쓰세요.',
       'T(n) = T(n−1) + 2n = T(n−2) + 2(n−1) + 2n = … = T(1) + 2(2 + 3 + … + n) = 2 + 2(n(n+1)/2 − 1) = n(n+1) → O(n²)',
-      'T(1) = 2를 2·1로 보면 T(n) = 2(1 + 2 + … + n)입니다. (검산 완료)'),
+      EXPLANATIONS['r3']),
     q('analysis', 'T(n) = 4T(n/2) + n, T(1) = 1을 연속 대치법으로 풀고 시간 복잡도를 쓰시오. (n은 2의 거듭제곱) 풀이 과정을 쓰세요.',
       'T(n) = 4T(n/2) + n = 16T(n/4) + 2n + n = … = 4ᵏT(n/2ᵏ) + n(1 + 2 + … + 2ᵏ⁻¹) = 4ᵏT(n/2ᵏ) + n(2ᵏ − 1). 2ᵏ = n이면 4ᵏ = n²이므로 T(n) = n² + n(n − 1) = 2n² − n → O(n²)',
-      '4ᵏ = (2ᵏ)² = n²로 바꾸는 게 포인트. 마스터 정리(a = 4 > 2¹)와도 일치합니다. (검산 완료)'),
+      EXPLANATIONS['r4']),
     code_q('recursion', '출력 결과를 줄마다 순서대로 쓰시오.',
            "def h(n, a, b, c):\n    if n == 0:\n        return 0\n    x = h(n - 1, a, c, b)\n    print(a, '->', c)\n    y = h(n - 1, b, a, c)\n    return x + y + 1\n\nprint(h(2, 'A', 'B', 'C'))",
            '하노이탑 n = 2: 원판 이동 3줄을 출력한 뒤 이동 횟수 3을 출력합니다.'),
@@ -264,10 +265,10 @@ set3 = [
     q('analysis', 'n = 4일 때 count의 최종 값은?', f'{c3}', f'i ≤ j ≤ k인 조합 수 = C(n+2, 3) = {c3}. O(n³).', code=loop3, accepted=nums(c3)),
     q('analysis', 'T(n) = 2T(n−1) + 1, T(1) = 1을 연속 대치법으로 풀고 시간 복잡도를 쓰시오. 풀이 과정을 쓰세요.',
       'T(n) = 2T(n−1) + 1 = 4T(n−2) + 2 + 1 = … = 2ᵏT(n−k) + (2ᵏ − 1). n−k = 1이면 k = n−1, T(n) = 2ⁿ⁻¹ + 2ⁿ⁻¹ − 1 = 2ⁿ − 1 → O(2ⁿ)',
-      '하노이탑 이동 횟수와 같은 식이에요. (n = 1~29 검산 완료)'),
+      EXPLANATIONS['r5']),
     q('analysis', 'T(n) = 3T(n/3) + n, T(1) = 1을 연속 대치법으로 풀고 시간 복잡도를 쓰시오. (n은 3의 거듭제곱) 풀이 과정을 쓰세요.',
       'T(n) = 3T(n/3) + n = 9T(n/9) + n + n = … = 3ᵏT(n/3ᵏ) + kn. n/3ᵏ = 1이면 k = log₃n, T(n) = n + n log₃n → O(n log n)',
-      '단계마다 비용이 n씩 쌓이고 단계 수가 log₃n이에요. (n = 1, 3, …, 243 검산 완료)'),
+      EXPLANATIONS['r6']),
     code_q('recursion', '출력 결과를 쓰시오.', tree_code, 'f(1) = 1, f(2) = 1 + 1 + 2 = 4, f(4) = 4 + 4 + 4 = 12, f(8) = 12 + 12 + 8'),
     code_q('recursion', '출력 결과를 쓰시오. (공백으로 구분)', pre_code, '가운데 m을 먼저 출력하고 왼쪽, 오른쪽 순으로 내려갑니다(이진 탐색의 mid 순서와 같은 모양).'),
     *selection_q([3, 1, 3, 2, 1]),

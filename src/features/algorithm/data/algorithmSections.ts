@@ -25,6 +25,12 @@ export function lessonSections(id: string) {
     { id: 'graphs-dfs', title: 'DFS · 깊이 우선 탐색', indices: [1, 4], visual: 'dfs' },
     { id: 'graphs-bfs', title: 'BFS · 너비 우선 탐색', indices: [2, 5], visual: 'bfs' },
   ]
+  if (id === 'decrease') return [
+    { id: 'decrease-insertion', title: '삽입 정렬', indices: [0], visual: 'decrease-insertion' },
+    { id: 'decrease-binary', title: '이진 탐색', indices: [1], visual: 'decrease-binary' },
+    { id: 'decrease-topological', title: '위상 정렬 · 진입차수로 순서 정하기', indices: [2], visual: 'decrease-topological' },
+    { id: 'decrease-power', title: '빠른 거듭제곱 · 지수를 절반으로 줄이기', indices: [3], visual: 'decrease-power' },
+  ]
   if (id === 'recursion') return [
     { id: 'recursion-definition', title: '순환과 재귀적 정의', indices: [4, 5], visual: 'none' },
     { id: 'recursion-calls', title: '팩토리얼 계산과 호출 흐름', indices: [0, 3], visual: 'none' },

@@ -1,0 +1,21 @@
+.traversal-instruction { color: #526178; font-size: 13px; line-height: 1.8; }
+.traversal-answer .traversal-node { cursor: pointer; outline: none; }
+.traversal-node circle, .traversal-node text { transition: fill .15s ease, stroke .15s ease; }
+.traversal-node:not([aria-disabled=true]):hover > circle:first-child,
+.traversal-node:focus-visible > circle:first-child { stroke: #0757ff; stroke-width: 4px; }
+.traversal-node[aria-disabled=true] { cursor: default; }
+.traversal-node-picker { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.traversal-node-picker button { min-width: 44px; min-height: 44px; border: 1px solid #adc4df; border-radius: 8px; background: #fff; color: #24466c; font: inherit; font-weight: 600; cursor: pointer; }
+.traversal-node-picker button:hover:not(:disabled) { background: #edf4ff; border-color: #0757ff; }
+.traversal-node-picker button:disabled { opacity: .4; cursor: default; }
+.traversal-sequence { padding: 15px; border: 1px solid #d5e2f0; border-radius: 9px; background: #f6f9fd; }
+.traversal-sequence > span { font-size: 12px; color: #526178; }
+.traversal-sequence ol { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 12px 0 0; padding: 0; }
+.traversal-sequence li { display: flex; align-items: center; gap: 7px; padding: 8px 12px; background: #e5efff; border-radius: 7px; color: #174e9c; }
+.traversal-sequence li small { color: #617eaa; font-size: 10px; }
+.traversal-sequence > p { margin: 10px 0 0; color: #71839c; font-size: 12px; }
+.traversal-edit-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
+.traversal-edit-actions button { min-height: 44px; padding: 8px 13px; border: 1px solid #d3dfec; border-radius: 7px; background: #fff; color: #526178; font: inherit; font-size: 12px; cursor: pointer; }
+.traversal-edit-actions button:disabled { opacity: .4; cursor: default; }
+.traversal-node-picker button:focus-visible, .traversal-edit-actions button:focus-visible { outline: 2px solid #0757ff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .traversal-node circle, .traversal-node text { transition: none; } }

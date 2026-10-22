@@ -1,0 +1,37 @@
+.decrease-example { min-width: 0; }
+.topological-example-graph { display: block; width: 100%; max-width: 680px; height: auto; max-height: none; margin: 20px auto; }
+.decrease-example .decrease-legend { font-size: 13px; }
+.topological-node-buttons { display: flex; flex-wrap: wrap; gap: 9px; margin: 18px 0; }
+.topological-node-buttons button { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 72px; min-height: 60px; padding: 10px 13px; border: 1px solid #7fa6d6; border-radius: 8px; background: #eaf2ff; color: #245c9e; font: inherit; cursor: pointer; }
+.topological-node-buttons button span { font-size: 10px; }
+.topological-node-buttons button:disabled { color: #74879b; background: #f4f7fa; border-color: #d5dfe8; cursor: default; }
+.topological-node-buttons button:focus-visible { outline: 2px solid #0757ff; outline-offset: 3px; }
+.decrease-step-status { padding: 14px 16px; border: 1px solid #cbded2; border-radius: 9px; background: #fff; font-size: 13px; line-height: 1.9; }
+.decrease-order { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; color: #245743; font-size: 13px; }
+.power-call-stack { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.power-call-stack span { padding: 9px 12px; border: 1px solid #cadacc; border-radius: 7px; background: #fff; font: 12px/1.6 Consolas, monospace; }
+.power-call-stack span[data-active=true] { border-color: #28775c; background: #dceee2; }
+.power-trace-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.power-trace-table caption { padding: 10px; text-align: left; color: #526178; }
+.power-trace-table th, .power-trace-table td { padding: 10px 12px; border-bottom: 1px solid #d6e3db; text-align: left; }
+.power-trace-table tr[data-current=true] { background: #dceee2; }
+.decrease-example details { margin-top: 18px; }
+.decrease-example summary { cursor: pointer; font-size: 13px; color: #245743; }
+.decrease-example .decrease-final { font-weight: 700; color: #245743; }
+@media (max-width: 760px) { .topological-node-buttons { gap: 6px; }.topological-node-buttons button { min-width: 58px; padding: 8px; }.power-trace-table th, .power-trace-table td { padding: 8px; font-size: 11px; }.decrease-step-status { padding: 12px; } }
+
+.decrease-lesson-prose { display: block; margin: 16px 0 22px; }
+.decrease-lesson-prose article { padding: 0; border: 0; background: none; }
+.decrease-lesson-prose article > p { margin: 0; color: #40516b; font-size: 16px; line-height: 2; word-break: keep-all; overflow-wrap: anywhere; }
+.study-section[id^="decrease-"] > .algo-visual { margin: 20px 0 32px; padding: 0; border: 0; border-radius: 0; background: none; }
+.study-section[id^="decrease-"] > .algo-visual > h3 { margin-bottom: 12px; font-size: 19px; }
+.study-section[id^="decrease-"] > .algo-visual > p { font-size: 14px; line-height: 1.95; }
+.decrease-code-example { margin-top: 24px; padding-top: 20px; border-top: 1px solid #dfe6ef; }
+.decrease-code-example h4 { font-size: 15px; margin: 0 0 12px; }
+.decrease-code-example > p { color: #526178; font-size: 14px; line-height: 1.9; }
+.decrease-code-example .python-output { max-height: none; margin-bottom: 16px; }
+@media (max-width: 760px) {
+  .decrease-lesson-prose article > p { font-size: 15px; line-height: 1.95; }
+  .study-section[id^="decrease-"] > .algo-visual > p { font-size: 14px; }
+  .topological-example-graph { margin: 14px auto; }
+}

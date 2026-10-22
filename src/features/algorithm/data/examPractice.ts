@@ -1,7 +1,14 @@
+import type { TraversalGraphKind } from './traversalGraphs'
+
 export type ExamKind = 'concept'|'choice'|'blank'|'analysis'|'traversal'|'reading'
 export const examKinds:Record<ExamKind,string>={concept:'개념 서술',choice:'객관식',blank:'코드 빈칸',analysis:'효율성 분석',traversal:'DFS·BFS 순서',reading:'코드 읽기·서술'}
-export type ExamQuestion={id:string;kind:ExamKind;prompt:string;code?:string;answer:string;explanation:string;options?:string[];correct?:number;graph?:'one'|'two'}
+export type ExamQuestion={id:string;kind:ExamKind;prompt:string;code?:string;answer:string;explanation:string;options?:string[];correct?:number;graph?:TraversalGraphKind;accepted?:string[]}
 const q=(id:string,kind:ExamKind,prompt:string,answer:string,explanation:string,code?:string):ExamQuestion=>({id,kind,prompt,answer,explanation,code})
+function traversalAnswers(answer: string): string[] {
+  const nodes = answer.split(' ')
+  return [answer, nodes.join(','), nodes.join('→'), nodes.join('->'), nodes.join('-'), `[${nodes.join(',')}]`]
+}
+export const traversalStorageKey = 'justStudy.algorithm.traversalPractice.v1'
 export const examPractice:ExamQuestion[]=[
   q('c1','concept','알고리즘의 다섯 조건을 쓰고 유한성과 유효성을 구별하라.','입력·출력·명확성·유한성·유효성','입력은 0개 이상, 출력은 1개 이상이다. 유한성은 유한 단계 후 종료, 유효성은 실제 실행 가능한 명령이라는 뜻이다.'),
   q('c2','concept','억지 기법의 의미와 작은 입력에서 사용할 수 있는 이유를 설명하라.','문제 정의에 따른 직접적인 해결 전략. 작은 입력에서는 후보 수가 적고 준비 비용도 작다.','점근적으로 더 좋은 알고리즘보다 작은 입력에서 빠를 수도 있다. 큰 입력에서도 항상 효율적이라는 뜻은 아니다.'),
@@ -36,7 +43,15 @@ export const examPractice:ExamQuestion[]=[
     ['g2','one','A에서 BFS를 수행할 때 큐에서 꺼내 처리하는 순서를 쓰라.','A B C D E F G H','발견 즉시 방문 처리하고 이웃을 알파벳순으로 큐에 넣는다.'],
     ['g3','two','A에서 재귀 DFS를 수행할 때 처음 방문한 순서를 쓰라.','A B D E C F','A→B→D→E→C→F 순으로 미방문 이웃을 따라간다.'],
     ['g4','two','A에서 BFS를 수행할 때 큐에서 꺼내 처리하는 순서를 쓰라.','A B C D E F','A의 B,C 다음 B에서 D,E, C에서 F를 발견한다.'],
-  ] as const).map(([id,graph,prompt,answer,explanation])=>({...q(id,'traversal',prompt,answer,explanation),graph})),
+    ['g5','branch','A에서 재귀 DFS로 처음 방문하는 노드 순서를 쓰라.','A B D E C F G','A의 이웃 B를 먼저 선택한다. B에서 D와 E를 탐색한 뒤 A로 돌아와 C, F, G를 방문한다.'],
+    ['g6','branch','A에서 BFS로 처리하는 노드 순서를 쓰라.','A B C D E F G','A에서 B와 C를 먼저 발견한다. B에서 D와 E, C에서 F와 G를 큐에 넣는다.'],
+    ['g7','cycle','순환이 있는 그래프에서 A의 재귀 DFS 방문 순서를 쓰라.','A B D F E C G','A-B-D-F-E까지 깊이 들어간다. E의 미방문 이웃 C를 먼저 방문하고 돌아온 뒤 G를 방문한다. 이미 방문한 노드는 건너뛴다.'],
+    ['g8','cycle','순환이 있는 그래프에서 A의 BFS 방문 순서를 쓰라.','A B C D E F G','A에서 B,C, B에서 D, C에서 E, D에서 F를 발견한다. E에서 F는 이미 발견했으므로 중복 삽입하지 않고 G만 넣는다.'],
+    ['g9','number','1번 노드에서 재귀 DFS로 처음 방문하는 순서를 쓰라.','1 2 5 8 6 3 4 7','1-2-5-8-6까지 깊이 탐색한다. 6의 이웃은 모두 방문했으므로 1까지 돌아온 뒤 미방문 이웃 3, 4와 4의 이웃 7을 방문한다.'],
+    ['g10','number','1번 노드에서 BFS로 처리하는 순서를 쓰라.','1 2 3 4 5 6 7 8','1에서 2,3,4를 발견한다. 2에서 5,6, 4에서 7, 5에서 8을 큐에 넣는다. 6에서 8을 다시 넣지 않는다.'],
+    ['g11','restart','A가 아닌 C에서 시작할 때 재귀 DFS 방문 순서를 쓰라.','C A B D E F G','시작점 C를 먼저 적는다. C의 이웃 A,F,G 중 A에 들어가 B,D,E까지 탐색하고 C로 돌아와 F와 G를 방문한다.'],
+    ['g12','restart','C에서 시작할 때 BFS 방문 순서를 쓰라.','C A F G B D E','C의 이웃 A,F,G를 알파벳순으로 큐에 넣는다. A에서 B를 발견하고, B에서 D와 E를 발견한다. 그림의 좌우 배치와 방문 순서는 다르다.'],
+  ] as const).map(([id,graph,prompt,answer,explanation])=>({...q(id,'traversal',prompt,answer,explanation),graph,accepted:traversalAnswers(answer)})),
   q('r1','reading','아래 코드의 출력 결과를 줄바꿈까지 쓰고 이유를 설명하라.','1\n2\n3','재귀 호출이 먼저 실행되므로 가장 작은 호출부터 돌아오며 출력한다.','def f(n):\n    if n == 0:\n        return\n    f(n-1)\n    print(n)\nf(3)'),
   q('r2','reading','아래 코드의 출력 결과를 순서대로 쓰라.','3\n2\n1\n1\n2\n3','호출 전에는 3,2,1을 출력하고 복귀하면서 1,2,3을 출력한다.','def f(n):\n    if n == 0:\n        return\n    print(n)\n    f(n-1)\n    print(n)\nf(3)'),
   q('r3','reading','출력값과 최초 호출을 포함한 f의 전체 호출 횟수를 구하라.','출력 5, 호출 15회','F(5)=5. C(0)=C(1)=1, C(n)=1+C(n−1)+C(n−2)이므로 C(5)=15.','def f(n):\n    if n < 2:\n        return n\n    return f(n-1) + f(n-2)\nprint(f(5))'),
@@ -44,3 +59,5 @@ export const examPractice:ExamQuestion[]=[
   q('r5','reading','실행 후 A를 쓰고, 전체 정렬이 완료되었는지 설명하라.','[2,3,5,1], 전체 정렬 미완료','key=2를 앞의 정렬 구간에 넣는 한 회전만 실행했다.','A = [3,5,2,1]\ni = 2\nkey = A[i]\nj = i-1\nwhile j >= 0 and A[j] > key:\n    A[j+1] = A[j]\n    j -= 1\nA[j+1] = key\nprint(A)'),
   q('r6','reading','출력값과 문자 비교 과정을 설명하라.','2','시작0: A,B,A 일치 후 B≠C. 시작1: B≠A. 시작2에서 ABAC 전체 일치.','def f(t,p):\n    for i in range(len(t)-len(p)+1):\n        j = 0\n        while j < len(p) and t[i+j] == p[j]:\n            j += 1\n        if j == len(p):\n            return i\n    return -1\nprint(f("ABABAC", "ABAC"))'),
 ]
+
+export const traversalPractice = examPractice.filter(question => question.kind === 'traversal')

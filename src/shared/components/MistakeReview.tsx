@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import ChoiceOptions from './ChoiceOptions'
+import StructuredAnswer from './StructuredAnswer'
+import { structuredAnswerReady } from '../quiz/structuredAnswers'
 import { collectMistakes, describeResponse, gradeResponse, importExistingMistakes, mistakeChangeEvent, saveReviewResponse } from '../quiz/mistakeStorage'
 import type { CourseId, Mistake, ReviewQuestion, ReviewResponse, ReviewSource } from '../quiz/mistakeStorage'
 import type { AnswerInputProps } from './ExamSession'
@@ -17,8 +19,9 @@ function ReviewCard({ entry, source, question, active, onOpen, onClose, onSave, 
   const [history, setHistory] = useState(false)
   const auto = isAuto(question)
   const correct = gradeResponse(question, response)
-  const answerInput = renderAnswer?.(source, question, { value: response.text, disabled: submitted, onChange: text => setResponse(previous => ({ ...previous, text })) })
-  const ready = question.options ? response.choice !== undefined : question.multiOptions ? Boolean(response.selections?.length) : Boolean(response.text.trim())
+  const inputProps = { value: response.text, disabled: submitted, onChange: (text: string) => setResponse(previous => ({ ...previous, text })) }
+  const answerInput = question.answerTable || question.answerFields ? <StructuredAnswer question={question} {...inputProps}/> : renderAnswer?.(source, question, inputProps)
+  const ready = question.options ? response.choice !== undefined : question.multiOptions ? Boolean(response.selections?.length) : structuredAnswerReady(question, response.text)
   function start() { setResponse({ text: '' }); setSubmitted(false); setHistory(false); onOpen() }
   function submit() { const next = { ...response, submitted: true }; if (onSave(next)) { setSubmitted(true); setResponse(next) } }
   function mark(review: 'correct' | 'again') { const next = { ...response, review, submitted: true }; if (onSave(next)) setResponse(next) }
@@ -29,7 +32,7 @@ function ReviewCard({ entry, source, question, active, onOpen, onClose, onSave, 
     {history ? <div className="mistake-history content-enter"><p><strong>이전에 틀린 답</strong>{describeResponse(question, entry.lastWrong)}</p><p><strong>정답·모범 답안</strong>{question.answer}</p><p><strong>해설</strong>{question.explanation}</p></div> : null}
     {active ? <div className="mistake-attempt content-enter">{renderQuestion?.(source, question)}{question.code ? <pre className="sql-code"><code>{question.code}</code></pre> : null}
       {answerInput ?? (question.options ? <ChoiceOptions options={question.options} value={response.choice} disabled={submitted} correctIndex={question.correct} revealed={submitted} onChange={choice=>setResponse(previous=>({...previous,choice}))}/> : question.multiOptions ? <fieldset className="mistake-multiple"><legend>조건을 만족하는 항목을 모두 선택하세요.</legend>{question.multiOptions.map((option,index)=><label key={index}><input type="checkbox" checked={response.selections?.includes(index) ?? false} disabled={submitted} onChange={()=>setResponse(previous=>({...previous,selections:previous.selections?.includes(index)?previous.selections.filter(value=>value!==index):[...(previous.selections??[]),index]}))}/><span>{option}</span></label>)}</fieldset> : <label className="exam-written-label">{question.numericSequence ? (question.numericSequenceLabel ?? '전체 리스트를 쉼표 또는 공백으로 구분해 작성하세요.') : question.accepted ? '빈칸의 답을 작성하세요.' : '답안과 판단 근거를 작성하세요.'}{question.accepted || question.numericSequence ? <input className="exam-short-answer" value={response.text} disabled={submitted} autoComplete="off" spellCheck={false} onChange={event=>setResponse(previous=>({...previous,text:event.target.value}))}/> : <textarea className="exam-written-answer" rows={6} value={response.text} disabled={submitted} onChange={event=>setResponse(previous=>({...previous,text:event.target.value}))}/>}</label>)}
-      {!submitted ? <button type="button" className="quiz-primary" disabled={!ready} onClick={submit}>제출하고 확인</button> : <div className="exam-feedback" data-result={auto ? correct ? 'correct' : 'incorrect' : undefined} role="status"><strong>{auto ? correct ? '정답입니다. 해결한 오답으로 옮겼습니다.' : '아직 틀렸어요. 해설을 확인하고 다시 도전하세요.' : '모범 답안과 비교한 뒤 복습 결과를 표시하세요.'}</strong><p style={{whiteSpace:'pre-wrap'}}>{question.answer}</p><p style={{whiteSpace:'pre-wrap'}}>{question.explanation}</p>{!auto ? <div className="mistake-card-actions"><button type="button" className="visual-button" disabled={response.review==='correct'} onClick={()=>mark('correct')}>이해했어요 · 복습 완료</button><button type="button" className="visual-button" disabled={response.review==='again'} onClick={()=>mark('again')}>다시 풀기 표시</button></div> : null}<button type="button" className="quiz-learn-link" onClick={()=>{setSubmitted(false);setResponse({text:''})}}>한 번 더 풀기</button></div>}
+      {!submitted ? <button type="button" className="quiz-primary" disabled={!ready} onClick={submit}>제출하고 확인</button> : <div className="exam-feedback" data-result={auto ? correct ? 'correct' : 'incorrect' : undefined} role="status"><strong>{auto ? correct ? '정답입니다. 해결한 오답으로 옮겼습니다.' : '아직 틀렸어요. 해설을 확인하고 다시 도전하세요.' : '모범 답안과 비교한 뒤 복습 결과를 표시하세요.'}</strong>{question.answerTable?<StructuredAnswer question={question} value={question.accepted?.[0]??''} disabled onChange={()=>{}} solution/>:<p style={{whiteSpace:'pre-wrap'}}>{question.answer}</p>}<p style={{whiteSpace:'pre-wrap'}}>{question.explanation}</p>{!auto ? <div className="mistake-card-actions"><button type="button" className="visual-button" disabled={response.review==='correct'} onClick={()=>mark('correct')}>이해했어요 · 복습 완료</button><button type="button" className="visual-button" disabled={response.review==='again'} onClick={()=>mark('again')}>다시 풀기 표시</button></div> : null}<button type="button" className="quiz-learn-link" onClick={()=>{setSubmitted(false);setResponse({text:''})}}>한 번 더 풀기</button></div>}
     </div> : null}
   </article>
 }

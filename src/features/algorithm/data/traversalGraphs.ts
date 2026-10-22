@@ -1,8 +1,11 @@
-type TraversalGraph = {
+import { mockExamGraphs } from './mockExamGraphs'
+
+export type TraversalGraph = {
   start: string
   order: 'alphabet' | 'number'
   edges: [string, string][]
   positions: Record<string, [number, number]>
+  directed?: boolean
 }
 
 const letterPositions: TraversalGraph['positions'] = {
@@ -11,6 +14,7 @@ const letterPositions: TraversalGraph['positions'] = {
 }
 
 export const traversalGraphs = {
+  ...mockExamGraphs,
   one: { start: 'A', order: 'alphabet', positions: letterPositions, edges: [['A','B'],['A','C'],['B','D'],['C','D'],['C','E'],['D','F'],['E','G'],['E','H'],['G','H']] },
   two: { start: 'A', order: 'alphabet', positions: letterPositions, edges: [['A','B'],['A','C'],['B','D'],['B','E'],['C','E'],['C','F'],['D','E']] },
   branch: { start: 'A', order: 'alphabet', positions: { A:[250,40], B:[140,135], C:[360,135], D:[65,255], E:[200,255], F:[310,255], G:[440,255] }, edges: [['A','B'],['A','C'],['B','D'],['B','E'],['C','F'],['C','G']] },

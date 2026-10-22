@@ -1,0 +1,14 @@
+.master-lesson { margin: 20px 0; color: #344961; font-size: 16px; line-height: 1.95; }
+.master-lesson > p { margin: 16px 0; }
+.master-lesson h3 { margin: 36px 0 14px; color: #16365d; font-size: 20px; }
+.master-lesson h4 { margin: 0 0 12px; color: #16365d; font-size: 18px; }
+.master-lesson .master-formula { font-size: clamp(21px, 3vw, 30px); color: #164e99; font-weight: 650; padding: 16px 0; }
+.master-lesson table { width: 100%; min-width: 580px; border-collapse: collapse; }
+.master-lesson th, .master-lesson td { padding: 14px; border: 1px solid #d6e1ed; text-align: left; white-space: normal; line-height: 1.8; }
+.master-lesson thead th { background: #eff5fc; color: #24446b; }
+.master-worked-example { margin: 24px 0 32px; padding: 24px 0 0; border-top: 1px solid #d6e1ed; }
+.master-worked-example ol { padding-left: 26px; margin: 12px 0; }
+.master-worked-example li { padding: 5px 0 5px 4px; }
+.master-answer-template { max-width: 100%; overflow-x: auto; padding: 20px; border-left: 4px solid #4581d0; background: #f3f7fd; font: 15px/2 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.master-study-link { margin: 18px 0; }
+@media (max-width: 600px) { .master-lesson { font-size: 16px; } .master-lesson h3 { font-size: 19px; } .master-lesson h4 { font-size: 17px; } }

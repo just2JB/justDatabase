@@ -17,7 +17,7 @@ export function lessonSections(id: string) {
   if (id === 'divide') return [
     { id: 'divide-strategy', title: '분할 정복과 리스트 합', indices: [0, 1], visual: 'divide-sum' },
     { id: 'divide-recurrence', title: '순환 관계식과 연속 대치법', indices: [2, 3], visual: 'divide-recurrence' },
-    { id: 'divide-master', title: '마스터 정리와 피자 비유', indices: [4, 5], visual: 'divide-master' },
+    { id: 'divide-master', title: '마스터 정리 · 공식과 단계별 풀이', indices: [], visual: 'divide-master' },
     { id: 'divide-merge', title: '병합 정렬 · 8개 원소 전체 과정', indices: [6, 7, 8], visual: 'divide-merge' },
     { id: 'divide-quick', title: '퀵 정렬 · 피벗으로 나누기', indices: [9, 10, 11], visual: 'divide-quick' },
   ]

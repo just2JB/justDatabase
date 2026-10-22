@@ -3,6 +3,7 @@ import type { ReviewSource } from '../../../shared/quiz/mistakeStorage'
 import { questions } from '../data/algorithmQuestions'
 import { examPractice, traversalPractice, traversalStorageKey } from '../data/examPractice'
 import TraversalAnswer from './TraversalAnswer'
+import SortQuestionVisual from './SortQuestionVisual'
 import { isTraversalGraph } from '../data/traversalGraphs'
 import { quickPracticeProblems, quickPracticeRounds, quickPracticeStorageKey, quickRoundAnswerValues } from '../data/quickSortPracticeData'
 import { quickPartitionCode } from '../data/quickSortTrace'
@@ -17,5 +18,5 @@ export const algorithmReviewSources: ReviewSource[] = [
 ]
 
 export default function AlgorithmMistakes({ onStart }: { onStart: () => void }) {
-  return <MistakeReview course="algorithm" sources={algorithmReviewSources} onStart={onStart} renderAnswer={(_, question, props) => isTraversalGraph(question.graph) ? <TraversalAnswer kind={question.graph} {...props}/> : undefined}/>
+  return <MistakeReview course="algorithm" sources={algorithmReviewSources} onStart={onStart} renderQuestion={(_,question)=><SortQuestionVisual key={question.id} question={question}/>} renderAnswer={(_, question, props) => isTraversalGraph(question.graph) ? <TraversalAnswer kind={question.graph} {...props}/> : undefined}/>
 }

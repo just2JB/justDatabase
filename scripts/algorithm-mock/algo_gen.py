@@ -1,6 +1,6 @@
 """Usage: python algo_gen.py <app data .ts path> <vault notes dir>
 
-Builds three algorithm mock exams from computed answers and writes the app data file + vault notes."""
+Builds five algorithm mock exams from computed answers and writes the app data file + vault notes."""
 import json
 import math
 import sys
@@ -11,12 +11,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from algo_engine import (bfs_order, binary_search, dfs_order, fmt, insertion_passes, merge_sort_trace,
                          quick_rounds, run_python, selection_passes, seq_variants, string_match, topo_order)
 from recurrence_explanations import EXPLANATIONS
+from extended_mock_sets import GRAPH_DATA, make_sets
 
 APP_FILE = Path(sys.argv[1])
 VAULT_DIR = Path(sys.argv[2])
 
 KINDS = {'analysis': '효율성 분석', 'recursion': '재귀·코드 읽기', 'sort': '정렬 회전', 'search': '탐색',
-         'graph': '그래프', 'divide': '분할 정복'}
+         'graph': '그래프', 'divide': '분할 정복', 'master': '마스터 정리', 'blank': '코드 빈칸·출력'}
 GRAPH_RULE = '인접 정점은 알파벳순으로 확인합니다. DFS는 재귀 호출, BFS는 큐에 넣을 때 방문 처리합니다.'
 TOPO_RULE = '진입 차수가 0인 정점을 하나씩 제거하며, 후보가 여러 개면 알파벳이 빠른 정점을 먼저 고릅니다.'
 SORT_RULE = '값이 바뀌지 않아도 1회전으로 셉니다.'
@@ -57,6 +58,8 @@ def selection_q(values, ask_round=None):
         r = passes[ask_round - 1]
         items.append(q('sort', f'리스트 {fmt(values)}를 선택 정렬로 정렬할 때 {ask_round}회전 직후의 리스트는? (예: 1, 2, 3)',
                        fmt(r), f'1~{ask_round}회전: ' + ' → '.join(fmt(p) for p in passes[:ask_round]), accepted=seq_variants(r)))
+    for item in items:
+        item['sortVisual'] = {'method': 'selection', 'values': list(values)}
     return items
 
 
@@ -69,6 +72,8 @@ def insertion_q(values, ask_round=None):
         r = passes[ask_round - 1]
         items.append(q('sort', f'리스트 {fmt(values)}를 삽입 정렬로 정렬할 때 {ask_round}회전 직후의 리스트는?',
                        fmt(r), ' → '.join(fmt(p) for p in passes[:ask_round]), accepted=seq_variants(r)))
+    for item in items:
+        item['sortVisual'] = {'method': 'insertion', 'values': list(values)}
     return items
 
 
@@ -82,6 +87,8 @@ def quick_q(values, ask_count=False):
         items.append(q('sort', f'위 규칙의 퀵 정렬로 리스트 {fmt(values)}를 정렬하면 회전은 모두 몇 번인가?', f'{len(rounds)}회',
                        '피벗별 회전: ' + ', '.join(str(r['pivot']) for r in rounds) + '. 원소 1개 구간은 세지 않습니다.',
                        accepted=nums(len(rounds))))
+    for item in items:
+        item['sortVisual'] = {'method': 'quick', 'values': list(values)}
     return items
 
 
@@ -292,6 +299,7 @@ SETS = [
     ('mock2', '모의고사 2회 · 응용', '2회 응용', '조금 더 긴 입력과 탐색 실패, 하노이·피보나치 코드 읽기를 다룹니다.', set2),
     ('mock3', '모의고사 3회 · 고난도', '3회 고난도', '중복값 정렬, 사이클 있는 위상 정렬, 분할 정복 서술을 집중적으로 다룹니다.', set3),
 ]
+SETS.extend(make_sets())
 
 # ---------- app data file ----------
 lines = [
@@ -312,6 +320,10 @@ for view, title, short, guide, items in SETS:
                                     'storageKey': f'justStudy.algorithm.{view}.v1', 'questions': questions}, ensure_ascii=False) + ',')
 lines.append(']')
 APP_FILE.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+graph_source = "import type { TraversalGraph } from './traversalGraphs'\n\nexport const mockExamGraphs = "
+graph_source += json.dumps(GRAPH_DATA, ensure_ascii=False, indent=2)
+graph_source += ' satisfies Record<string, TraversalGraph>\n'
+APP_FILE.with_name('mockExamGraphs.ts').write_text(graph_source, encoding='utf-8')
 
 # ---------- vault notes ----------
 for n, (view, title, short, guide, items) in enumerate(SETS, 1):
@@ -332,7 +344,7 @@ for n, (view, title, short, guide, items) in enumerate(SETS, 1):
             md += ['> [!success]- 정답']
             md += ['> ' + line for line in str(it['answer']).split('\n')]
             md += ['>', f"> 💡 {it['explanation']}", '']
-    others = ' · '.join(f'[[알고리즘 모의고사 {m}회]]' for m in (1, 2, 3) if m != n)
+    others = ' · '.join(f'[[알고리즘 모의고사 {m}회]]' for m in range(1, len(SETS) + 1) if m != n)
     md += [f'다른 회차: {others} · 정리: [[ALG 헷갈리는 포인트]]']
     (VAULT_DIR / f'알고리즘 모의고사 {n}회.md').write_text('\n'.join(md) + '\n', encoding='utf-8')
 

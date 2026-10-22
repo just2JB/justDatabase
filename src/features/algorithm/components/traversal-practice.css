@@ -1,4 +1,5 @@
 .traversal-instruction { color: #526178; font-size: 13px; line-height: 1.8; }
+.traversal-answer .exam-graph { width: 100%; max-width: 850px; max-height: none; margin: 24px auto; }
 .traversal-answer .traversal-node { cursor: pointer; outline: none; }
 .traversal-node circle, .traversal-node text { transition: fill .15s ease, stroke .15s ease; }
 .traversal-node:not([aria-disabled=true]):hover > circle:first-child,

@@ -1,0 +1,10 @@
+.mock-sort-help { margin: 20px 0; }
+.mock-sort-help > button { min-height: 44px; }
+.mock-sort-panel { margin: 18px 0 24px; }
+.mock-sort-panel > p { font-size: 15px; line-height: 1.9; color: #405571; }
+.mock-sort-rounds { margin: 18px 0; }
+.mock-sort-rounds button { min-height: 44px; }
+.mock-sort-panel .mock-sort-array { font-size: 16px; line-height: 1.9; }
+.mock-sort-panel .algo-diagram, .mock-sort-panel .quick-sort-chart { width: 100%; max-height: none; height: auto; }
+.mock-sort-panel .algo-visual { min-width: 0; }
+.mock-sort-array { overflow-wrap: anywhere; }

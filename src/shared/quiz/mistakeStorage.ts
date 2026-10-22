@@ -1,4 +1,5 @@
 import type { PracticeQuestion } from '../components/ExamSession'
+import { answerCellCount, readAnswerCells } from './structuredAnswers'
 
 export type CourseId = 'database' | 'algorithm' | 'engineering-project'
 export type ReviewResponse = { text: string; choice?: number; selections?: number[]; submitted?: boolean; review?: 'correct' | 'again' }
@@ -104,6 +105,15 @@ export function saveReviewResponse(source: ReviewSource, question: ReviewQuestio
 }
 
 export function describeResponse(question: ReviewQuestion, response: ReviewResponse) {
+  if (question.answerTable) {
+    const { rows, columns } = question.answerTable
+    const cells = readAnswerCells(response.text, answerCellCount(question))
+    return rows.map((row, index) => `${row}: ${cells.slice(index * columns.length, (index + 1) * columns.length).map(value => value || '미입력').join(', ')}`).join('\n')
+  }
+  if (question.answerFields) {
+    const cells = readAnswerCells(response.text, answerCellCount(question))
+    return question.answerFields.map((label, index) => `${label}: ${cells[index] || '미입력'}`).join('\n')
+  }
   if (question.multiOptions) return response.selections?.length ? response.selections.map(index => question.multiOptions![index]).join(' · ') : '이전 선택값이 저장되어 있지 않습니다.'
   if (question.options) return question.options[response.choice ?? -1] ?? '이전 선택값이 저장되어 있지 않습니다.'
   return response.text || '이전 답안이 저장되어 있지 않습니다.'

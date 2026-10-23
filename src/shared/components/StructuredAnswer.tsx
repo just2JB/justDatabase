@@ -1,13 +1,19 @@
+import { useState } from 'react'
 import type { AnswerInputProps } from './ExamSession'
-import { answerCellCount, readAnswerCells } from '../quiz/structuredAnswers'
+import { answerCellCount, readAnswerCells, checkAnswerRow } from '../quiz/structuredAnswers'
 import type { StructuredQuestion } from '../quiz/structuredAnswers'
 import './structured-answer.css'
 
-export default function StructuredAnswer({ question, value, disabled, onChange, solution = false }: AnswerInputProps & { question: StructuredQuestion; solution?: boolean }) {
+export default function StructuredAnswer({ question, value, disabled, onChange, solution = false }: AnswerInputProps & { question: StructuredQuestion & { accepted?: string[] }; solution?: boolean }) {
+  const [checked, setChecked] = useState<Record<number, boolean>>({})
   const cells = readAnswerCells(value, answerCellCount(question))
   function change(index: number, text: string) {
     const next = [...cells]
     next[index] = text
+    if (question.answerTable) {
+      const row = Math.floor(index / question.answerTable.columns.length)
+      setChecked(previous => ({ ...previous, [row]: false }))
+    }
     onChange(JSON.stringify(next))
   }
   const table = question.answerTable
@@ -17,10 +23,13 @@ export default function StructuredAnswer({ question, value, disabled, onChange, 
       <table className="structured-answer-table">
         <caption>{solution ? '모범 답안 · 회전별 결과' : '회전별 답안 입력'}{table.initial ? ` · 입력 [${table.initial.join(', ')}]` : ''}</caption>
         <thead><tr><th scope="col">회전</th>{table.columns.map(column => <th scope="col" key={column}>{column}</th>)}</tr></thead>
-        <tbody>{table.rows.map((row, rowIndex) => <tr key={row}><th scope="row">{row}</th>{table.columns.map((column, columnIndex) => {
+        <tbody>{table.rows.map((row, rowIndex) => {
+          const result = checkAnswerRow(table, value, question.accepted?.[0] ?? '', rowIndex)
+          return <tr key={row}><th scope="row">{row}{table.checkRows && !solution && !disabled ? <div className="structured-row-check"><button type="button" aria-label={`${row} 정답 확인`} disabled={!result.ready} onClick={()=>setChecked(previous=>({...previous,[rowIndex]:true}))}>정답 확인</button>{checked[rowIndex] ? <span role="status">{result.correct}/{result.total} 정답</span> : null}</div> : null}</th>{table.columns.map((column, columnIndex) => {
           const index = rowIndex * table.columns.length + columnIndex
-          return <td key={column}>{solution ? cells[index] : <input aria-label={`${row} ${column}`} inputMode="numeric" autoComplete="off" value={cells[index]} disabled={disabled} onChange={event => change(index, event.target.value.replace(/[^0-9-]/g, ''))}/>}</td>
-        })}</tr>)}</tbody>
+          const cellResult = checked[rowIndex] ? result.results[columnIndex] : undefined
+          return <td key={column} data-cell-result={!solution && cellResult ? cellResult.correct ? 'correct' : 'incorrect' : undefined}>{solution ? cells[index] : <><input aria-label={`${row} ${column}`} inputMode="numeric" autoComplete="off" value={cells[index]} disabled={disabled} onChange={event => change(index, event.target.value.replace(/[^0-9-]/g, ''))}/>{cellResult ? <small className="structured-cell-answer">{cellResult.correct ? '정답' : `정답 ${cellResult.answer}`}</small> : null}</>}</td>
+        })}</tr>})}</tbody>
       </table>
     </div>
   </div>

@@ -8,3 +8,6 @@
 .mock-sort-panel .algo-diagram, .mock-sort-panel .quick-sort-chart { width: 100%; max-height: none; height: auto; }
 .mock-sort-panel .algo-visual { min-width: 0; }
 .mock-sort-array { overflow-wrap: anywhere; }
+.merge-practice-parts { display: flex; flex-wrap: wrap; gap: 12px; }
+.merge-practice-parts p { flex: 1 1 150px; padding: 14px; background: #fff; border: 1px solid #d7e2ed; border-radius: 8px; }
+.merge-practice-parts strong { display: block; margin-bottom: 7px; }

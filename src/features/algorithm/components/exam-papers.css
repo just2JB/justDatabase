@@ -1,0 +1,10 @@
+.exam-paper-heading { margin: 26px 0 18px; }
+.exam-paper-heading p { color: #526780; line-height: 1.9; font-size: 14px; }
+.exam-paper-picker { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 10px; margin: 20px 0 24px; }
+.exam-paper-picker button { min-height: 94px; padding: 16px; text-align: left; border: 1px solid #c8d8eb; border-radius: 10px; background: #fff; color: #345476; font: inherit; cursor: pointer; }
+.exam-paper-picker button[aria-pressed=true] { border-color: #0757ff; background: #edf4ff; color: #0757ff; box-shadow: inset 0 0 0 1px #0757ff; }
+.exam-paper-picker strong, .exam-paper-picker span, .exam-paper-picker small { display: block; }
+.exam-paper-picker strong { font-size: 16px; margin-bottom: 7px; }
+.exam-paper-picker span { font-size: 13px; }
+.exam-paper-picker small { color: #647891; font-size: 12px; line-height: 1.75; margin-top: 7px; }
+.exam-paper-picker button:focus-visible { outline: 3px solid #a4c2ff; outline-offset: 3px; }

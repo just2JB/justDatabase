@@ -12,6 +12,7 @@ from algo_engine import (bfs_order, binary_search, dfs_order, fmt, insertion_pas
                          quick_rounds, run_python, selection_passes, seq_variants, string_match, topo_order)
 from recurrence_explanations import EXPLANATIONS
 from extended_mock_sets import GRAPH_DATA, make_sets
+from pre_exam_sets import PRE_GRAPHS, PRE_KINDS, make_pre_exam_sets
 
 APP_FILE = Path(sys.argv[1])
 VAULT_DIR = Path(sys.argv[2])
@@ -321,7 +322,12 @@ for view, title, short, guide, items in SETS:
 lines.append(']')
 APP_FILE.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 graph_source = "import type { TraversalGraph } from './traversalGraphs'\n\nexport const mockExamGraphs = "
-graph_source += json.dumps(GRAPH_DATA, ensure_ascii=False, indent=2)
+pre_exam_sets = make_pre_exam_sets()
+pre_source = "import type { AlgorithmMockSet } from './algorithmMockSets'\n\n"
+pre_source += 'export const preExamKinds: Record<string, string> = ' + json.dumps(PRE_KINDS, ensure_ascii=False) + '\n\n'
+pre_source += 'export const preExamSets: AlgorithmMockSet[] = ' + json.dumps(pre_exam_sets, ensure_ascii=False, indent=2) + '\n'
+APP_FILE.with_name('preExamSets.ts').write_text(pre_source, encoding='utf-8')
+graph_source += json.dumps({**GRAPH_DATA, **PRE_GRAPHS}, ensure_ascii=False, indent=2)
 graph_source += ' satisfies Record<string, TraversalGraph>\n'
 APP_FILE.with_name('mockExamGraphs.ts').write_text(graph_source, encoding='utf-8')
 

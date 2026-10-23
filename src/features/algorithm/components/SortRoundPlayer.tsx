@@ -2,10 +2,11 @@ import { useMemo, useState } from 'react'
 import StepControls from '../../../shared/components/StepControls'
 import { ArrayDiagram } from './AlgorithmDiagrams'
 import QuickSortVisual from './QuickSortVisual'
+import MergeRoundPlayer from './MergeRoundPlayer'
 import { sortPracticeTrace } from '../data/sortPracticeTrace'
 
-export default function SortRoundPlayer({ method, values }: { method: 'selection'|'insertion'|'quick'; values: number[] }) {
-  return method === 'quick' ? <QuickSortVisual initialValues={values} practice showCode={false}/> : <SimpleSortPlayer method={method} values={values}/>
+export default function SortRoundPlayer({ method, values }: { method: 'selection'|'insertion'|'quick'|'merge'; values: number[] }) {
+  return method === 'quick' ? <QuickSortVisual initialValues={values} practice showCode={false}/> : method === 'merge' ? <MergeRoundPlayer values={values}/> : <SimpleSortPlayer method={method} values={values}/>
 }
 
 function SimpleSortPlayer({ method, values }: { method: 'selection'|'insertion'; values: number[] }) {
